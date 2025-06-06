@@ -41,6 +41,14 @@ import type { Product } from "@/types";
 import { useState, type ChangeEvent, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 const initialProductState: Partial<Product> = {
   name: "",
@@ -68,6 +76,10 @@ export default function ProductsPage() {
     return ["All", ...Array.from(uniqueCategories).sort()];
   }, [products]);
 
+  const assignableCategories = useMemo(() => {
+    return Array.from(new Set(products.map(p => p.category).filter(Boolean) as string[])).sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
       const matchesCategoryTab = selectedCategory === "All" || product.category === selectedCategory;
@@ -82,8 +94,6 @@ export default function ProductsPage() {
       const descriptionMatch = product.description && product.description.toLowerCase().includes(searchTermLower);
       
       let categoryTextMatch = false;
-      // Only search category text via input if 'All' tab is selected, 
-      // otherwise category is already matched by tab selection.
       if (selectedCategory === "All") {
         categoryTextMatch = product.category && product.category.toLowerCase().includes(searchTermLower);
       }
@@ -117,26 +127,47 @@ export default function ProductsPage() {
         setCurrentProduct(prev => ({ ...prev, price: parseFloat(value) || 0 }));
     } else if (name === "ingredients") {
       setCurrentProduct(prev => ({ ...prev, [name]: value.split(',').map(s => s.trim()) }));
-    } else if (name === "category") {
-      const newCategory = value;
-      setCurrentProduct(prev => {
-        if (!prev) return null;
-        let newPrice = prev.price;
-        if ((newCategory === "Pizza" || newCategory === "spacial pizza") && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["24cm"] ) ) ) {
-          newPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
-        } else if (newCategory === "Burger" && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["1 Patty"] ) ) ) {
-          newPrice = { "1 Patty": 0, "2 Patty": 0 };
-        }
-        else if ((prev.category === "Pizza" || prev.category === "spacial pizza" || prev.category === "Burger") && newCategory !== "Pizza" && newCategory !== "spacial pizza" && newCategory !== "Burger" && typeof prev.price === 'object' && prev.price) {
-          const priceValues = Object.values(prev.price).filter(p => typeof p === 'number') as number[];
-          newPrice = priceValues.length > 0 ? Math.min(...priceValues) : 0;
-        }
-        return { ...prev, category: newCategory, price: newPrice };
-      });
     }
+    // Category change is handled by handleCategoryChange
     else {
       setCurrentProduct(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleCategoryChange = (newCategoryValue: string) => {
+    if (!currentProduct) return; 
+    
+    setCurrentProduct(prevProductState => {
+      if (!prevProductState) return null; 
+  
+      let newPrice = prevProductState.price;
+      const previousCategory = prevProductState.category;
+  
+      if ((newCategoryValue === "Pizza" || newCategoryValue === "spacial pizza")) {
+          if (typeof prevProductState.price === 'number' || !prevProductState.price || (typeof prevProductState.price === 'object' && prevProductState.price !== null && !prevProductState.price.hasOwnProperty("24cm"))) {
+              newPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
+          }
+      } else if (newCategoryValue === "Burger") {
+          if (typeof prevProductState.price === 'number' || !prevProductState.price || (typeof prevProductState.price === 'object' && prevProductState.price !== null && !prevProductState.price.hasOwnProperty("1 Patty"))) {
+              newPrice = { "1 Patty": 0, "2 Patty": 0 };
+          }
+      } else {
+          if ((previousCategory === "Pizza" || previousCategory === "spacial pizza" || previousCategory === "Burger") && 
+              typeof prevProductState.price === 'object' && prevProductState.price !== null) {
+              const priceValues = Object.values(prevProductState.price).filter(p => typeof p === 'number') as number[];
+              newPrice = priceValues.length > 0 ? Math.min(...priceValues) : 0; 
+          } else if (typeof prevProductState.price === 'object' && prevProductState.price !== null) {
+              const priceValues = Object.values(prevProductState.price).filter(p => typeof p === 'number') as number[];
+              newPrice = priceValues.length > 0 ? Math.min(...priceValues) : 0;
+          }
+      }
+  
+      return {
+        ...prevProductState,
+        category: newCategoryValue,
+        price: newPrice,
+      };
+    });
   };
 
 
@@ -460,7 +491,21 @@ export default function ProductsPage() {
 
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="category" className="text-right">Category</Label>
-                  <Input id="category" name="category" value={currentProduct?.category || ""} onChange={handleInputChange} className="col-span-3" placeholder="e.g., Pizza, Burger, Salad" />
+                  <Select
+                    value={currentProduct?.category || ""}
+                    onValueChange={handleCategoryChange}
+                  >
+                    <SelectTrigger id="category" className="col-span-3">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assignableCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {(currentProduct?.category === 'Pizza' || currentProduct?.category === 'spacial pizza') ? (
