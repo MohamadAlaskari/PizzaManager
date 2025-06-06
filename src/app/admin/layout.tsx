@@ -8,7 +8,7 @@ import { PanelLeft } from 'lucide-react';
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex min-h-screen bg-background"> {/* Parent Flex Container */}
+      <div className="flex min-h-screen w-full bg-background"> {/* Added w-full here */}
         <Sidebar
             collapsible="icon"
             className="hidden md:flex border-r border-sidebar-border"
