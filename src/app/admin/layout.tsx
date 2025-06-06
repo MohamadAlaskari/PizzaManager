@@ -3,9 +3,9 @@ import { AdminSidebar } from '@/components/layout/AdminSidebar';
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 overflow-auto flex flex-col">
+      <main className="ml-64 flex-1 p-6 lg:p-8 overflow-y-auto flex flex-col h-screen">
         <div className="flex-grow">
           {children}
         </div>

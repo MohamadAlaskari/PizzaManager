@@ -51,7 +51,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <aside className="bg-sidebar text-sidebar-foreground w-64 min-h-screen flex flex-col border-r border-sidebar-border shadow-lg">
+    <aside className="bg-sidebar text-sidebar-foreground w-64 h-screen fixed top-0 left-0 z-40 flex flex-col border-r border-sidebar-border shadow-lg">
       <div className="p-4 border-b border-sidebar-border">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
           <CookingPot className="h-8 w-8 text-primary" />
