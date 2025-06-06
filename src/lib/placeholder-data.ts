@@ -2,10 +2,68 @@
 import type { User, Product, Order, SalesData, UserTrendData, ProductPerformanceData } from '@/types';
 
 export const placeholderUsers: User[] = [
-  { id: '1', name: 'Alice Admin', email: 'alice@example.com', role: 'admin', createdAt: '2023-01-15' },
-  { id: '2', name: 'Bob Employee', email: 'bob@example.com', role: 'employee', createdAt: '2023-02-20' },
-  { id: '3', name: 'Charlie Customer', email: 'charlie@example.com', role: 'customer', createdAt: '2023-03-10' },
-  { id: '4', name: 'Diana Driver', email: 'diana@example.com', role: 'employee', createdAt: '2023-04-05' },
+  {
+    id: "u001",
+    role: "admin",
+    email: "admin@pizzaladen.de",
+    passwordHash: "...",
+    fullName: "Mario Rossi",
+    status: "active",
+    createdAt: "2025-06-06T12:00:00Z",
+    permissions: ["manage_users", "edit_menu", "view_financials"]
+  },
+  {
+    id: "u002",
+    role: "employee",
+    email: "fahrer@pizzaladen.de",
+    passwordHash: "...",
+    fullName: "Ali Mert",
+    status: "active",
+    position: "driver",
+    vehicleType: "car",
+    workingHours: {
+      monday: "17:00-22:00",
+      friday: "18:00-23:00"
+    },
+    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
+  },
+  {
+    id: "u003",
+    role: "employee",
+    email: "baecker@pizzaladen.de",
+    passwordHash: "...",
+    fullName: "Elena Bauer",
+    status: "active",
+    position: "baker",
+    speciality: ["Pizza", "Pasta"],
+    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
+  },
+  {
+    id: "u004",
+    role: "employee",
+    email: "verkaeufer@pizzaladen.de",
+    passwordHash: "...",
+    fullName: "Tim Schneider",
+    status: "active",
+    position: "cashier",
+    languageSkills: ["Deutsch", "Englisch"],
+    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
+  },
+  {
+    id: "u005",
+    role: "customer",
+    email: "kunde@example.com",
+    passwordHash: "...",
+    fullName: "Jonas Becker",
+    phone: "+4915123456789",
+    address: {
+      street: "Musterstraße 12",
+      postalCode: "28215",
+      city: "Bremen"
+    },
+    status: "active",
+    createdAt: "2025-06-01T18:45:00Z"
+  }
 ];
 
 const newPizzas: Product[] = [
@@ -707,7 +765,7 @@ const menues: Product[] = [
   {
     id: 'menu6',
     name: 'Menü 6',
-    description: '1 x 30 cm Pizza, 3 Beläge nach Wahl, 1 L Getränk nach Wahl', // Assuming 3cm was a typo for 30cm
+    description: '1 x 30 cm Pizza, 3 Beläge nach Wahl, 1 L Getränk nach Wahl',
     price: 12.50,
     ingredients: ["1 x 30cm Pizza (3 Beläge nach Wahl)", "1L Getränk nach Wahl"],
     imageUrl: 'https://placehold.co/300x200.png',
@@ -735,12 +793,12 @@ export const placeholderProducts: Product[] = [
 export const placeholderOrders: Order[] = [
   {
     id: 'o1',
-    customerName: 'Charlie Customer',
+    customerName: 'Jonas Becker', // Updated to match new user data
     items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }],
     totalAmount: 9.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
-    deliveryAddress: '123 Main St, Anytown, USA'
+    deliveryAddress: 'Musterstraße 12, 28215 Bremen' // Updated to match new user data
   },
   {
     id: 'o2',
@@ -756,12 +814,12 @@ export const placeholderOrders: Order[] = [
   },
   {
     id: 'o3',
-    customerName: 'Alice Admin',
+    customerName: 'Mario Rossi', // Updated to match new user data
     items: [{ productId: 'b1', productName: 'Hamburger (1 Patty)', quantity: 2, price: 5.90 }],
     totalAmount: 11.80,
     status: 'Pending',
     orderDate: '2023-05-06',
-    deliveryAddress: '789 Pine Ln, Anytown, USA'
+    deliveryAddress: 'Admin Address not specified in user data'
   },
 ];
 
@@ -815,3 +873,4 @@ export const currentInventoryJsonExample = JSON.stringify({
 }, null, 2);
 
     
+

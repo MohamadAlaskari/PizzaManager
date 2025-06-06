@@ -31,7 +31,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -53,7 +52,7 @@ export default function UsersPage() {
   const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -63,13 +62,18 @@ export default function UsersPage() {
     setCurrentUser(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleRoleChange = (value: string) => {
+  const handleRoleChange = (value: User['role']) => {
     if (!currentUser) return;
-    setCurrentUser(prev => ({ ...prev, role: value as User['role'] }));
+    setCurrentUser(prev => ({ ...prev, role: value }));
   };
 
+  const handleStatusChange = (value: User['status']) => {
+    if(!currentUser) return;
+    setCurrentUser(prev => ({ ...prev, status: value}));
+  }
+
   const openAddModal = () => {
-    setCurrentUser({ name: "", email: "", role: "customer" });
+    setCurrentUser({ fullName: "", email: "", role: "customer", status: "active" });
     setIsFormOpen(true);
   };
 
@@ -79,15 +83,20 @@ export default function UsersPage() {
   };
 
   const handleSaveUser = () => {
-    // In a real app, this would involve an API call
-    if (currentUser?.id) { // Editing existing user
+    if (!currentUser || !currentUser.fullName || !currentUser.email || !currentUser.role || !currentUser.status) {
+      // Basic validation, can be expanded
+      alert("Please fill all required fields.");
+      return;
+    }
+  
+    if (currentUser?.id) { 
       setUsers(users.map(u => u.id === currentUser.id ? currentUser as User : u));
-    } else { // Adding new user
+    } else { 
       const newUser: User = {
-        id: (Math.random() * 10000).toString(), // Temporary ID
-        createdAt: new Date().toISOString().split('T')[0],
+        id: `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`, // Temporary ID
+        createdAt: new Date().toISOString(),
         ...currentUser
-      } as User;
+      } as User; // Type assertion, ensure all required fields are there
       setUsers([...users, newUser]);
     }
     setIsFormOpen(false);
@@ -95,8 +104,26 @@ export default function UsersPage() {
   };
 
   const handleDeleteUser = (userId: string) => {
-     // In a real app, this would involve an API call and confirmation
     setUsers(users.filter(u => u.id !== userId));
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (e) {
+      return 'Invalid Date';
+    }
+  };
+
+  const getStatusBadgeVariant = (status: User['status']): "default" | "secondary" | "outline" | "destructive" => {
+    switch (status) {
+      case 'active': return 'default'; // Greenish in default theme, often primary
+      case 'inactive': return 'secondary'; // Grayish
+      case 'suspended': return 'destructive'; // Reddish
+      case 'pending_verification': return 'outline'; // Bluish or yellowish
+      default: return 'default';
+    }
   };
 
 
@@ -118,7 +145,7 @@ export default function UsersPage() {
           <CardDescription>View, edit, or add new users.</CardDescription>
           <div className="mt-4">
             <Input
-              placeholder="Search users..."
+              placeholder="Search users by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
@@ -130,9 +157,10 @@ export default function UsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Full Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -140,14 +168,19 @@ export default function UsersPage() {
               <TableBody>
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="font-medium">{user.fullName}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'employee' ? 'secondary' : 'outline'}>
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{user.createdAt}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(user.status)}>
+                        {user.status.charAt(0).toUpperCase() + user.status.slice(1).replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{formatDate(user.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -189,8 +222,8 @@ export default function UsersPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Name</Label>
-              <Input id="name" name="name" value={currentUser?.name || ""} onChange={handleInputChange} className="col-span-3" />
+              <Label htmlFor="fullName" className="text-right">Full Name</Label>
+              <Input id="fullName" name="fullName" value={currentUser?.fullName || ""} onChange={handleInputChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">Email</Label>
@@ -209,6 +242,20 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">Status</Label>
+              <Select name="status" value={currentUser?.status || "active"} onValueChange={handleStatusChange}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="pending_verification">Pending Verification</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <DialogClose asChild>
@@ -221,3 +268,4 @@ export default function UsersPage() {
     </>
   );
 }
+
