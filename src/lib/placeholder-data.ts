@@ -14,7 +14,7 @@ const newPizzas: Product[] = [
     name: 'Margarita',
     description: 'Klassische Pizza Margherita.',
     price: { "24cm": 7.00, "30cm": 9.00, "40cm": 12.50 },
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'], // Standard ingredients for Margarita
+    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
@@ -263,26 +263,56 @@ const newPizzas: Product[] = [
   },
 ];
 
-const otherProducts: Product[] = [
-  // Burgers
+const newBurgers: Product[] = [
   {
     id: 'b1',
-    name: 'Classic Burger',
-    description: 'Saftiger Rindfleisch-Patty mit Salat, Tomate und Spezialsauce.',
-    price: 7.99,
-    ingredients: ['Brötchen', 'Rindfleisch-Patty', 'Salat', 'Tomate', 'Zwiebel', 'Spezialsauce'],
+    name: 'Hamburger',
+    description: '100g Patty, Eisbergsalat, Tomaten, Gurken, Zwiebeln, Sauce',
+    price: { "1 Patty": 5.90, "2 Patty": 7.70 },
+    ingredients: ["100g Patty", "Eisbergsalat", "Tomaten", "Gurken", "Zwiebeln", "Sauce"],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
   },
   {
     id: 'b2',
     name: 'Cheeseburger',
-    description: 'Der Klassiker mit geschmolzenem Cheddar-Käse.',
-    price: 8.49,
-    ingredients: ['Brötchen', 'Rindfleisch-Patty', 'Cheddar-Käse', 'Salat', 'Tomate', 'Zwiebel', 'Spezialsauce'],
+    description: '100g Patty, Eisbergsalat, Tomaten, Gurken, Zwiebeln, Sauce, Käse',
+    price: { "1 Patty": 6.90, "2 Patty": 8.90 },
+    ingredients: ["100g Patty", "Eisbergsalat", "Tomaten", "Gurken", "Zwiebeln", "Sauce", "Käse"],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
   },
+  {
+    id: 'b3',
+    name: 'Chickenburger',
+    description: 'Eisbergsalat, Tomate, Gurken, Zwiebeln, Sauce',
+    price: { "1 Patty": 5.90, "2 Patty": 7.70 },
+    ingredients: ["Chicken Patty", "Eisbergsalat", "Tomaten", "Gurken", "Zwiebeln", "Sauce"],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Burger',
+  },
+  {
+    id: 'b4',
+    name: 'Veggie Burger',
+    description: 'Champignons',
+    price: { "1 Patty": 5.50, "2 Patty": 7.50 },
+    ingredients: ["Champignons"], // Assuming a mushroom patty or mushrooms as main component
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Burger',
+  },
+  {
+    id: 'b5',
+    name: 'Spezial Cheeseburger',
+    description: '100g Patty, Eisbergsalat, Tomaten, Gurke, Zwiebeln, Jalapenos, Soße, Käse',
+    price: { "1 Patty": 7.50, "2 Patty": 9.50 },
+    ingredients: ["100g Patty", "Eisbergsalat", "Tomaten", "Gurke", "Zwiebeln", "Jalapenos", "Soße", "Käse"],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Burger',
+  },
+];
+
+
+const otherProducts: Product[] = [
   // Salads
   {
     id: 's1',
@@ -314,13 +344,13 @@ const otherProducts: Product[] = [
   },
 ];
 
-export const placeholderProducts: Product[] = [...newPizzas, ...otherProducts];
+export const placeholderProducts: Product[] = [...newPizzas, ...newBurgers, ...otherProducts];
 
 export const placeholderOrders: Order[] = [
   {
     id: 'o1',
     customerName: 'Charlie Customer',
-    items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }], // Updated price based on new data
+    items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }], 
     totalAmount: 9.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
@@ -330,7 +360,7 @@ export const placeholderOrders: Order[] = [
     id: 'o2',
     customerName: 'Anonymous Guest',
     items: [
-      { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 }, // Using 'Salami' (p14) and its 30cm price
+      { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 }, 
       { productId: 'd1', productName: 'Cola', quantity: 2, price: 2.49 }
     ],
     totalAmount: 12.50 + (2 * 2.49),
@@ -341,8 +371,8 @@ export const placeholderOrders: Order[] = [
   {
     id: 'o3',
     customerName: 'Alice Admin',
-    items: [{ productId: 'b1', productName: 'Classic Burger', quantity: 2, price: 7.99 }],
-    totalAmount: 15.98,
+    items: [{ productId: 'b1', productName: 'Hamburger (1 Patty)', quantity: 2, price: 5.90 }], // Example using new burger price
+    totalAmount: 11.80,
     status: 'Pending',
     orderDate: '2023-05-06',
     deliveryAddress: '789 Pine Ln, Anytown, USA'
@@ -370,7 +400,7 @@ export const placeholderUserTrendData: UserTrendData[] = [
 export const placeholderProductPerformanceData: ProductPerformanceData[] = [
   { name: 'Margarita', sales: 120 }, 
   { name: 'Salami', sales: 95 }, 
-  { name: 'Classic Burger', sales: 80 },
+  { name: 'Hamburger', sales: 80 }, // Updated to Hamburger
   { name: 'Chicken', sales: 60 }, 
   { name: 'Cola', sales: 150 },
 ];

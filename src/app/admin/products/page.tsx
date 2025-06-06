@@ -44,7 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const initialProductState: Partial<Product> = {
   name: "",
   description: "",
-  price: 0, // Will be object for pizzas upon category selection
+  price: 0, 
   ingredients: [],
   imageUrl: "",
   category: ""
@@ -66,8 +66,11 @@ export default function ProductsPage() {
     if (!currentProduct) return;
     const { name, value } = e.target;
 
-    if (name.startsWith("price-")) { // For pizza size prices e.g. price-24cm
-      const size = name.split("-")[1]; // "24cm"
+    if (name.startsWith("price-")) { 
+      let keyName = name.substring("price-".length); // e.g., "24cm", "1Patty", "2Patty"
+      if (keyName === "1Patty") keyName = "1 Patty";
+      if (keyName === "2Patty") keyName = "2 Patty";
+      
       setCurrentProduct(prev => {
         if (!prev) return null;
         const existingPrices = typeof prev.price === 'object' ? prev.price : {};
@@ -75,11 +78,11 @@ export default function ProductsPage() {
           ...prev,
           price: {
             ...existingPrices,
-            [size]: parseFloat(value) || 0,
+            [keyName]: parseFloat(value) || 0,
           },
         };
       });
-    } else if (name === "price") { // For single price products
+    } else if (name === "price") { 
         setCurrentProduct(prev => ({ ...prev, price: parseFloat(value) || 0 }));
     } else if (name === "ingredients") {
       setCurrentProduct(prev => ({ ...prev, [name]: value.split(',').map(s => s.trim()) }));
@@ -88,12 +91,12 @@ export default function ProductsPage() {
       setCurrentProduct(prev => {
         if (!prev) return null;
         let newPrice = prev.price;
-        // If category changes TO Pizza, and price is a number (or not set for Pizza yet)
         if (newCategory === "Pizza" && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["24cm"] ) ) ) {
           newPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
+        } else if (newCategory === "Burger" && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["1 Patty"] ) ) ) {
+          newPrice = { "1 Patty": 0, "2 Patty": 0 };
         }
-        // If category changes FROM Pizza, and price is an object
-        else if (prev.category === "Pizza" && newCategory !== "Pizza" && typeof prev.price === 'object' && prev.price) {
+        else if ((prev.category === "Pizza" || prev.category === "Burger") && newCategory !== "Pizza" && newCategory !== "Burger" && typeof prev.price === 'object' && prev.price) {
           const priceValues = Object.values(prev.price).filter(p => typeof p === 'number') as number[];
           newPrice = priceValues.length > 0 ? Math.min(...priceValues) : 0;
         }
@@ -107,7 +110,7 @@ export default function ProductsPage() {
 
 
   const openAddModal = () => {
-    setCurrentProduct(JSON.parse(JSON.stringify(initialProductState))); // Deep copy
+    setCurrentProduct(JSON.parse(JSON.stringify(initialProductState))); 
     setIsFormOpen(true);
   };
 
@@ -117,18 +120,26 @@ export default function ProductsPage() {
   };
 
   const handleSaveProduct = () => {
-    if (!currentProduct || !currentProduct.name) return; // Basic validation
+    if (!currentProduct || !currentProduct.name) return; 
 
-    // Ensure price is correctly structured based on category
     let finalPrice = currentProduct.price;
     if (currentProduct.category === 'Pizza') {
       if (typeof currentProduct.price !== 'object' || currentProduct.price === null) {
         finalPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
-      } else { // Ensure all sizes are present, even if 0
+      } else { 
         finalPrice = {
           "24cm": (currentProduct.price as Record<string, number>)["24cm"] || 0,
           "30cm": (currentProduct.price as Record<string, number>)["30cm"] || 0,
           "40cm": (currentProduct.price as Record<string, number>)["40cm"] || 0,
+        };
+      }
+    } else if (currentProduct.category === 'Burger') {
+      if (typeof currentProduct.price !== 'object' || currentProduct.price === null) {
+        finalPrice = { "1 Patty": 0, "2 Patty": 0 };
+      } else {
+        finalPrice = {
+          "1 Patty": (currentProduct.price as Record<string, number>)["1 Patty"] || 0,
+          "2 Patty": (currentProduct.price as Record<string, number>)["2 Patty"] || 0,
         };
       }
     } else {
@@ -143,11 +154,11 @@ export default function ProductsPage() {
     const productToSave = { ...currentProduct, price: finalPrice };
 
 
-    if (currentProduct?.id) { // Editing existing product
+    if (currentProduct?.id) { 
       setProducts(products.map(p => p.id === productToSave.id ? productToSave as Product : p));
-    } else { // Adding new product
+    } else { 
       const newProduct: Product = {
-        id: `p${products.length + 1 + Math.floor(Math.random()*1000)}`, // Temporary ID
+        id: `p${products.length + 1 + Math.floor(Math.random()*1000)}`, 
         ...productToSave
       } as Product;
       setProducts([...products, newProduct]);
@@ -164,10 +175,17 @@ export default function ProductsPage() {
     if (typeof price === 'number') {
       return `€${price.toFixed(2)}`;
     }
-    if (category === 'Pizza' && typeof price === 'object' && price !== null) {
-      const priceValues = Object.values(price).filter(p => typeof p === 'number' && p > 0) as number[];
-      if (priceValues.length > 0) {
-        return `Ab €${Math.min(...priceValues).toFixed(2)}`;
+    if (typeof price === 'object' && price !== null) {
+      if (category === 'Pizza') {
+        const priceValues = Object.values(price).filter(p => typeof p === 'number' && p > 0) as number[];
+        if (priceValues.length > 0) {
+          return `Ab €${Math.min(...priceValues).toFixed(2)}`;
+        }
+      } else if (category === 'Burger') {
+        const patty1Price = price["1 Patty"];
+        if (typeof patty1Price === 'number' && patty1Price > 0) {
+          return `Ab €${patty1Price.toFixed(2)}`;
+        }
       }
     }
     return 'N/A';
@@ -179,7 +197,7 @@ export default function ProductsPage() {
       <PageTitle
         title="Product Management"
         icon={PizzaIcon}
-        description="Manage your delicious pizza offerings."
+        description="Manage your delicious product offerings."
         actions={
           <Button onClick={openAddModal}>
             <PlusCircle className="mr-2 h-4 w-4" /> Add New Product
@@ -189,7 +207,7 @@ export default function ProductsPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Product List</CardTitle>
-          <CardDescription>View, edit, or add new pizza products.</CardDescription>
+          <CardDescription>View, edit, or add new products.</CardDescription>
           <div className="mt-4">
             <Input
               placeholder="Search products..."
@@ -304,6 +322,17 @@ export default function ProductsPage() {
                       <Input id="price-40cm" name="price-40cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['40cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                   </>
+                ) : currentProduct?.category === 'Burger' ? (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="price-1Patty" className="text-right">Price (1 Patty)</Label>
+                      <Input id="price-1Patty" name="price-1Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['1 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="price-2Patty" className="text-right">Price (2 Patty)</Label>
+                      <Input id="price-2Patty" name="price-2Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['2 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                    </div>
+                  </>
                 ) : (
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="price" className="text-right">Price</Label>
@@ -333,3 +362,4 @@ export default function ProductsPage() {
     </>
   );
 }
+
