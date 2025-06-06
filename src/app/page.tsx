@@ -1,6 +1,7 @@
+
 import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  redirect('/admin/dashboard');
+  redirect('/login'); // Redirect to login page by default
   return null; 
 }
