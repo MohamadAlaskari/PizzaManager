@@ -327,7 +327,7 @@ export default function ProductsPage() {
               className="max-w-sm"
             />
             <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-              <TabsList className="flex flex-wrap h-auto justify-start">
+              <TabsList className="flex flex-nowrap h-auto justify-start overflow-x-auto">
                 {categories.map((category) => (
                   <TabsTrigger key={category} value={category} className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
                     {category || "Uncategorized"}
