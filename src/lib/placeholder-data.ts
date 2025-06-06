@@ -8,35 +8,262 @@ export const placeholderUsers: User[] = [
   { id: '4', name: 'Diana Driver', email: 'diana@example.com', role: 'employee', createdAt: '2023-04-05' },
 ];
 
-export const placeholderProducts: Product[] = [
-  // Pizzas
+const newPizzas: Product[] = [
   {
     id: 'p1',
-    name: 'Margherita',
-    description: 'Klassischer Genuss mit 100% echtem Mozzarella Käse.',
-    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
+    name: 'Margarita',
+    description: 'Klassische Pizza Margherita.',
+    price: { "24cm": 7.00, "30cm": 9.00, "40cm": 12.50 },
+    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'], // Standard ingredients for Margarita
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
   {
     id: 'p2',
-    name: 'Salami Pizza',
-    description: 'Ein Traum für Fleischliebhaber mit würziger Salami.',
-    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
+    name: 'Chicken',
+    description: 'mit Hähnchenfleisch, Zwiebel',
+    price: { "24cm": 10.50, "30cm": 14.20, "40cm": 16.90 },
+    ingredients: ['Hähnchenfleisch', 'Zwiebel'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
   {
     id: 'p3',
-    name: 'Veggie Supreme',
-    description: 'Beladen mit frischem Gemüse und Mozzarella.',
-    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Zwiebeln', 'Paprika', 'Oliven', 'Pilze'],
+    name: 'Big Beef',
+    description: 'mit Putenschinken, Jalapeños, Rindhackfleisch, Sauce Hollandaise',
+    price: { "24cm": 10.00, "30cm": 13.50, "40cm": 18.00 },
+    ingredients: ['Putenschinken', 'Jalapeños', 'Rindhackfleisch', 'Sauce Hollandaise'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
+  {
+    id: 'p4',
+    name: 'Kentucky',
+    description: 'mit Hähnchenfleisch, Broccoli, Knoblauch, Creme Fraîche',
+    price: { "24cm": 10.50, "30cm": 14.50, "40cm": 18.00 },
+    ingredients: ['Hähnchenfleisch', 'Broccoli', 'Knoblauch', 'Creme Fraîche'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p5',
+    name: 'Chicken Delux',
+    description: 'mit Hähnchenfleisch, Broccoli, Tomaten, Sauce',
+    price: { "24cm": 10.50, "30cm": 14.50, "40cm": 18.50 },
+    ingredients: ['Hähnchenfleisch', 'Broccoli', 'Tomaten', 'Sauce'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p6',
+    name: 'Mediterrane',
+    description: 'mit Paprika, Oliven, Hirtenkäse',
+    price: { "24cm": 10.50, "30cm": 14.50, "40cm": 17.50 },
+    ingredients: ['Paprika', 'Oliven', 'Hirtenkäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p7',
+    name: 'Time',
+    description: 'mit Salami, Schinken, Champignon, Mozzarella',
+    price: { "24cm": 13.00, "30cm": 16.50, "40cm": 21.00 },
+    ingredients: ['Salami', 'Schinken', 'Champignon', 'Mozzarella'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p8',
+    name: 'Beef Delux',
+    description: 'mit Rindfleisch, Mais, Hirtenkäse, BBQ-Sauce',
+    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 19.00 },
+    ingredients: ['Rindfleisch', 'Mais', 'Hirtenkäse', 'BBQ-Sauce'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p9',
+    name: 'Salami & Champignons',
+    description: 'mit Rindfleisch, Zwiebeln',
+    price: { "24cm": 10.00, "30cm": 15.00, "40cm": 17.00 },
+    ingredients: ['Rindfleisch', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p10',
+    name: 'Hawai',
+    description: 'mit Putenschinken, Ananas',
+    price: { "24cm": 10.00, "30cm": 13.00, "40cm": 17.00 },
+    ingredients: ['Putenschinken', 'Ananas'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p11',
+    name: 'Napoli',
+    description: 'mit Oliven, Mozzarella, Tomaten',
+    price: { "24cm": 10.00, "30cm": 13.50, "40cm": 18.00 },
+    ingredients: ['Oliven', 'Mozzarella', 'Tomaten'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p12',
+    name: 'Tonno',
+    description: 'mit Thunfisch, Peperoni, Zwiebeln',
+    price: { "24cm": 10.50, "30cm": 15.50, "40cm": 17.50 },
+    ingredients: ['Thunfisch', 'Peperoni', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p13',
+    name: 'Spinaci',
+    description: 'mit Knoblauch, Spinat, Weißkäse, Zwiebeln',
+    price: { "24cm": 10.00, "30cm": 13.00, "40cm": 17.00 },
+    ingredients: ['Knoblauch', 'Spinat', 'Weißkäse', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p14',
+    name: 'Salami',
+    description: 'mit Rindfleischsalami',
+    price: { "24cm": 9.50, "30cm": 12.50, "40cm": 16.00 },
+    ingredients: ['Rindfleischsalami'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p15',
+    name: 'Garnelen',
+    description: 'mit Garnelen, Knoblauch, Tomaten, Zwiebeln',
+    price: { "24cm": 10.00, "30cm": 13.00, "40cm": 17.50 },
+    ingredients: ['Garnelen', 'Knoblauch', 'Tomaten', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p16',
+    name: 'Pute',
+    description: 'mit Putenbrust, Mais, Paprika',
+    price: { "24cm": 10.00, "30cm": 13.50, "40cm": 17.00 },
+    ingredients: ['Putenbrust', 'Mais', 'Paprika'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p17',
+    name: 'Belami',
+    description: 'mit Knoblauchwurst, Spinat, Weißkäse, Zwiebeln',
+    price: { "24cm": 10.50, "30cm": 13.50, "40cm": 17.50 },
+    ingredients: ['Knoblauchwurst', 'Spinat', 'Weißkäse', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p18',
+    name: 'Gerate',
+    description: 'mit Hähnchenbrust, Broccoli, Sauce Hollandaise',
+    price: { "24cm": 10.50, "30cm": 15.50, "40cm": 17.50 },
+    ingredients: ['Hähnchenbrust', 'Broccoli', 'Sauce Hollandaise'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p19',
+    name: 'Frutti di Mare',
+    description: 'mit Meeresfrüchten, Knoblauch, Spinat',
+    price: { "24cm": 10.00, "30cm": 15.00, "40cm": 18.00 },
+    ingredients: ['Meeresfrüchten', 'Knoblauch', 'Spinat'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p20',
+    name: 'Vegetarisch',
+    description: 'mit Broccoli, Paprika, Champignons',
+    price: { "24cm": 7.00, "30cm": 13.50, "40cm": 17.50 },
+    ingredients: ['Broccoli', 'Paprika', 'Champignons'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p21',
+    name: 'Hähnchen-Curry',
+    description: 'mit Hähnchenbrust, Currysoße',
+    price: { "24cm": 10.50, "30cm": 13.50, "40cm": 18.00 },
+    ingredients: ['Hähnchenbrust', 'Currysoße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p22',
+    name: 'Hollandaise',
+    description: 'mit Hähnchenbrust, Broccoli, Sauce Hollandaise',
+    price: { "24cm": 11.00, "30cm": 14.50, "40cm": 20.00 },
+    ingredients: ['Hähnchenbrust', 'Broccoli', 'Sauce Hollandaise'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p23',
+    name: 'Mozzarella',
+    description: 'mit Mozzarella, Tomaten',
+    price: { "24cm": 10.00, "30cm": 13.50, "40cm": 17.50 },
+    ingredients: ['Mozzarella', 'Tomaten'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p24',
+    name: 'Dodo',
+    description: 'mit Knoblauchwurst, Sauce Hollandaise, Zwiebeln, Spargel',
+    price: { "24cm": 10.50, "30cm": 15.50, "40cm": 18.00 },
+    ingredients: ['Knoblauchwurst', 'Sauce Hollandaise', 'Zwiebeln', 'Spargel'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p25',
+    name: 'Funghi',
+    description: 'mit Champignons',
+    price: { "24cm": 9.50, "30cm": 12.50, "40cm": 16.50 },
+    ingredients: ['Champignons'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p26',
+    name: 'Mix',
+    description: 'mit Hähnchenfleisch, Knoblauchwurst, Gemüse',
+    price: { "24cm": 11.50, "30cm": 15.00, "40cm": 19.50 },
+    ingredients: ['Hähnchenfleisch', 'Knoblauchwurst', 'Gemüse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p27',
+    name: 'Schinken',
+    description: 'mit Putenschinken',
+    price: { "24cm": 9.50, "30cm": 12.50, "40cm": 17.00 },
+    ingredients: ['Putenschinken'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+  {
+    id: 'p28',
+    name: 'Kebab',
+    description: 'mit Kebabfleisch, Zwiebeln, Peperoni',
+    price: { "24cm": 9.50, "30cm": 12.50, "40cm": 17.00 },
+    ingredients: ['Kebabfleisch', 'Zwiebeln', 'Peperoni'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Pizza',
+  },
+];
+
+const otherProducts: Product[] = [
   // Burgers
   {
     id: 'b1',
@@ -87,12 +314,14 @@ export const placeholderProducts: Product[] = [
   },
 ];
 
+export const placeholderProducts: Product[] = [...newPizzas, ...otherProducts];
+
 export const placeholderOrders: Order[] = [
   {
     id: 'o1',
     customerName: 'Charlie Customer',
-    items: [{ productId: 'p1', productName: 'Margherita 30cm', quantity: 1, price: 15.00 }], // Assuming p1 is Margherita, price for 30cm
-    totalAmount: 15.00,
+    items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }], // Updated price based on new data
+    totalAmount: 9.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
     deliveryAddress: '123 Main St, Anytown, USA'
@@ -101,10 +330,10 @@ export const placeholderOrders: Order[] = [
     id: 'o2',
     customerName: 'Anonymous Guest',
     items: [
-      { productId: 'p2', productName: 'Salami Pizza 30cm', quantity: 1, price: 15.00 }, // Assuming p2 is Salami, price for 30cm
+      { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 }, // Using 'Salami' (p14) and its 30cm price
       { productId: 'd1', productName: 'Cola', quantity: 2, price: 2.49 }
     ],
-    totalAmount: 15.00 + (2 * 2.49),
+    totalAmount: 12.50 + (2 * 2.49),
     status: 'Preparing',
     orderDate: '2023-05-05',
     deliveryAddress: '456 Oak Ave, Anytown, USA'
@@ -139,10 +368,10 @@ export const placeholderUserTrendData: UserTrendData[] = [
 ];
 
 export const placeholderProductPerformanceData: ProductPerformanceData[] = [
-  { name: 'Margherita', sales: 120 }, // Consolidated name
-  { name: 'Salami Pizza', sales: 95 }, // Consolidated name
+  { name: 'Margarita', sales: 120 }, 
+  { name: 'Salami', sales: 95 }, 
   { name: 'Classic Burger', sales: 80 },
-  { name: 'Veggie Supreme', sales: 60 }, // Consolidated name
+  { name: 'Chicken', sales: 60 }, 
   { name: 'Cola', sales: 150 },
 ];
 
@@ -160,11 +389,12 @@ export const placeholderInventoryData = [
 ];
 
 export const pastSalesJsonExample = JSON.stringify([
-  {"date": "2024-07-01", "pizzaType": "Margherita", "size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Basilikum": 0.01}},
-  {"date": "2024-07-01", "pizzaType": "Salami Pizza","size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Salami": 0.1}},
-  {"date": "2024-07-02", "pizzaType": "Margherita", "size": "24cm", "ingredientsUsed": {"Pizzateig": 0.7, "Tomatensauce": 0.15, "Mozzarella": 0.1, "Basilikum": 0.007}},
+  {"date": "2024-07-01", "pizzaType": "Margarita", "size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Basilikum": 0.01}},
+  {"date": "2024-07-01", "pizzaType": "Salami","size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Salami": 0.1}},
+  {"date": "2024-07-02", "pizzaType": "Margarita", "size": "24cm", "ingredientsUsed": {"Pizzateig": 0.7, "Tomatensauce": 0.15, "Mozzarella": 0.1, "Basilikum": 0.007}},
 ], null, 2);
 
 export const currentInventoryJsonExample = JSON.stringify({
   "Pizzateig": 100, "Tomatensauce": 20, "Mozzarella": 30, "Basilikum": 5, "Salami": 15, "Burger Buns": 30, "Rindfleisch Patties": 25
 }, null, 2);
+
