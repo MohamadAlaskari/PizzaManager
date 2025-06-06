@@ -38,8 +38,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { placeholderProducts } from "@/lib/placeholder-data";
 import type { Product } from "@/types";
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const initialProductState: Partial<Product> = {
   name: "",
@@ -56,25 +57,50 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(initialProductState);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(products.map(p => p.category).filter(Boolean) as string[]);
+    return ["All", ...Array.from(uniqueCategories).sort()];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesCategoryTab = selectedCategory === "All" || product.category === selectedCategory;
+      if (!matchesCategoryTab) {
+        return false;
+      }
+
+      const searchTermLower = searchTerm.toLowerCase();
+      if (searchTermLower === "") return true;
+
+      const nameMatch = product.name.toLowerCase().includes(searchTermLower);
+      const descriptionMatch = product.description && product.description.toLowerCase().includes(searchTermLower);
+      
+      let categoryTextMatch = false;
+      // Only search category text via input if 'All' tab is selected, 
+      // otherwise category is already matched by tab selection.
+      if (selectedCategory === "All") {
+        categoryTextMatch = product.category && product.category.toLowerCase().includes(searchTermLower);
+      }
+      
+      return nameMatch || descriptionMatch || categoryTextMatch;
+    });
+  }, [products, selectedCategory, searchTerm]);
+
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!currentProduct) return;
     const { name, value } = e.target;
 
     if (name.startsWith("price-")) { 
-      let keyName = name.substring("price-".length); // e.g., "24cm", "1Patty", "2Patty"
+      let keyName = name.substring("price-".length); 
       if (keyName === "1Patty") keyName = "1 Patty";
       if (keyName === "2Patty") keyName = "2 Patty";
       
       setCurrentProduct(prev => {
         if (!prev) return null;
-        const existingPrices = typeof prev.price === 'object' ? prev.price : {};
+        const existingPrices = typeof prev.price === 'object' && prev.price !== null ? prev.price : {};
         return {
           ...prev,
           price: {
@@ -209,13 +235,22 @@ export default function ProductsPage() {
         <CardHeader>
           <CardTitle>Product List</CardTitle>
           <CardDescription>View, edit, or add new products.</CardDescription>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-4">
             <Input
-              placeholder="Search products by name, description or category..."
+              placeholder="Search products by name, description or category (if 'All' selected)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <TabsList className="flex flex-wrap h-auto justify-start">
+                {categories.map((category) => (
+                  <TabsTrigger key={category} value={category} className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
+                    {category || "Uncategorized"}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </CardHeader>
         <CardContent>
@@ -292,7 +327,7 @@ export default function ProductsPage() {
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <PackageSearch className="w-16 h-16 mb-4" />
               <p className="text-lg">No products found.</p>
-              <p>Try adjusting your search or add a new product.</p>
+              <p>Try adjusting your search or filter criteria.</p>
             </div>
           )}
         </CardContent>
@@ -327,32 +362,32 @@ export default function ProductsPage() {
                   <>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-24cm" className="text-right">Price (24cm)</Label>
-                      <Input id="price-24cm" name="price-24cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['24cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                      <Input id="price-24cm" name="price-24cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' && currentProduct.price !== null ? (currentProduct.price['24cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-30cm" className="text-right">Price (30cm)</Label>
-                      <Input id="price-30cm" name="price-30cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['30cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                      <Input id="price-30cm" name="price-30cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' && currentProduct.price !== null ? (currentProduct.price['30cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-40cm" className="text-right">Price (40cm)</Label>
-                      <Input id="price-40cm" name="price-40cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['40cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                      <Input id="price-40cm" name="price-40cm" type="number" step="0.01" value={typeof currentProduct.price === 'object' && currentProduct.price !== null ? (currentProduct.price['40cm'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                   </>
                 ) : currentProduct?.category === 'Burger' ? (
                   <>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-1Patty" className="text-right">Price (1 Patty)</Label>
-                      <Input id="price-1Patty" name="price-1Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['1 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                      <Input id="price-1Patty" name="price-1Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' && currentProduct.price !== null ? (currentProduct.price['1 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-2Patty" className="text-right">Price (2 Patty)</Label>
-                      <Input id="price-2Patty" name="price-2Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' ? (currentProduct.price['2 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                      <Input id="price-2Patty" name="price-2Patty" type="number" step="0.01" value={typeof currentProduct.price === 'object' && currentProduct.price !== null ? (currentProduct.price['2 Patty'] ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
                     </div>
                   </>
                 ) : (
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="price" className="text-right">Price</Label>
-                    <Input id="price" name="price" type="number" step="0.01" value={typeof currentProduct?.price === 'number' ? (currentProduct.price ?? '') : ''} onChange={handleInputChange} className="col-span-3" />
+                    <Input id="price" name="price" type="number" step="0.01" value={typeof currentProduct?.price === 'number' ? (currentProduct.price ?? '') : (typeof currentProduct?.price === 'object' && currentProduct?.price !== null && Object.values(currentProduct.price).length > 0 ? Object.values(currentProduct.price)[0] : '')} onChange={handleInputChange} className="col-span-3" />
                   </div>
                 )}
 
