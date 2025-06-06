@@ -2,7 +2,7 @@
 // src/app/admin/users/page.tsx
 "use client";
 
-import { PlusCircle, Users as UsersIcon, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Users as UsersIcon, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import { PageTitle } from "@/components/shared/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { placeholderUsers } from "@/lib/placeholder-data";
 import type { User } from "@/types";
 import { useState, type ChangeEvent } from "react";
@@ -50,6 +51,8 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
+  const [isViewDetailModalOpen, setIsViewDetailModalOpen] = useState(false);
+  const [selectedUserForView, setSelectedUserForView] = useState<User | null>(null);
 
   const filteredUsers = users.filter(user =>
     user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,10 +84,14 @@ export default function UsersPage() {
     setCurrentUser({ ...user });
     setIsFormOpen(true);
   };
+  
+  const openViewDetailModal = (user: User) => {
+    setSelectedUserForView(user);
+    setIsViewDetailModalOpen(true);
+  };
 
   const handleSaveUser = () => {
     if (!currentUser || !currentUser.fullName || !currentUser.email || !currentUser.role || !currentUser.status) {
-      // Basic validation, can be expanded
       alert("Please fill all required fields.");
       return;
     }
@@ -93,10 +100,10 @@ export default function UsersPage() {
       setUsers(users.map(u => u.id === currentUser.id ? currentUser as User : u));
     } else { 
       const newUser: User = {
-        id: `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`, // Temporary ID
+        id: `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`, 
         createdAt: new Date().toISOString(),
         ...currentUser
-      } as User; // Type assertion, ensure all required fields are there
+      } as User; 
       setUsers([...users, newUser]);
     }
     setIsFormOpen(false);
@@ -118,12 +125,40 @@ export default function UsersPage() {
 
   const getStatusBadgeVariant = (status: User['status']): "default" | "secondary" | "outline" | "destructive" => {
     switch (status) {
-      case 'active': return 'default'; // Greenish in default theme, often primary
-      case 'inactive': return 'secondary'; // Grayish
-      case 'suspended': return 'destructive'; // Reddish
-      case 'pending_verification': return 'outline'; // Bluish or yellowish
+      case 'active': return 'default'; 
+      case 'inactive': return 'secondary'; 
+      case 'suspended': return 'destructive'; 
+      case 'pending_verification': return 'outline'; 
       default: return 'default';
     }
+  };
+
+  const renderDetailItem = (label: string, value?: string | string[] | number | null | Record<string, any> | any[]) => {
+    if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
+      return null;
+    }
+    let displayValue: React.ReactNode;
+    if (Array.isArray(value)) {
+      displayValue = value.join(', ');
+    } else if (typeof value === 'object') {
+      displayValue = (
+        <ul className="list-disc pl-5 space-y-1">
+          {Object.entries(value).map(([key, val]) => (
+            <li key={key}>
+              <span className="font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}:</span> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+            </li>
+          ))}
+        </ul>
+      );
+    } else {
+      displayValue = String(value);
+    }
+    return (
+      <div>
+        <Label className="font-semibold">{label}</Label>
+        {typeof value === 'object' && !Array.isArray(value) ? <div className="mt-1">{displayValue}</div> : <p>{displayValue}</p>}
+      </div>
+    );
   };
 
 
@@ -191,6 +226,9 @@ export default function UsersPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                           <DropdownMenuItem onClick={() => openViewDetailModal(user)}>
+                            <Eye className="mr-2 h-4 w-4" /> Anzeigen
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEditModal(user)}>
                             <Edit className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
@@ -212,6 +250,75 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
+      {/* View User Detail Modal */}
+      <Dialog open={isViewDetailModalOpen} onOpenChange={setIsViewDetailModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-1">
+              <DialogHeader>
+                <DialogTitle>User Details: {selectedUserForView?.fullName}</DialogTitle>
+              </DialogHeader>
+              {selectedUserForView && (
+                <div className="grid gap-4 py-4">
+                  {renderDetailItem("ID", selectedUserForView.id)}
+                  {renderDetailItem("Full Name", selectedUserForView.fullName)}
+                  {renderDetailItem("Email", selectedUserForView.email)}
+                  {renderDetailItem("Role", selectedUserForView.role)}
+                  {renderDetailItem("Status", selectedUserForView.status)}
+                  {renderDetailItem("Created At", formatDate(selectedUserForView.createdAt))}
+
+                  {selectedUserForView.role === 'admin' && renderDetailItem("Permissions", selectedUserForView.permissions)}
+
+                  {selectedUserForView.role === 'employee' && (
+                    <>
+                      {renderDetailItem("Position", selectedUserForView.position)}
+                      {renderDetailItem("Contract Type", selectedUserForView.contractType)}
+                      {renderDetailItem("Salary", selectedUserForView.salary ? `${selectedUserForView.salary.amount} ${selectedUserForView.salary.currency} (${selectedUserForView.salary.type})` : undefined)}
+                      {renderDetailItem("Working Hours", selectedUserForView.workingHours)}
+                      {renderDetailItem("Vehicle Type", selectedUserForView.vehicleType)}
+                      {renderDetailItem("Speciality", selectedUserForView.speciality)}
+                      {renderDetailItem("Language Skills", selectedUserForView.languageSkills)}
+                      {renderDetailItem("Notes", selectedUserForView.notes)}
+                    </>
+                  )}
+
+                  {selectedUserForView.role === 'customer' && (
+                    <>
+                      {renderDetailItem("Phone", selectedUserForView.phone)}
+                      {selectedUserForView.address && (
+                        <div>
+                          <Label className="font-semibold">Address</Label>
+                          <p>{selectedUserForView.address.street}, {selectedUserForView.address.postalCode} {selectedUserForView.address.city}</p>
+                        </div>
+                      )}
+                      {selectedUserForView.orderHistory && selectedUserForView.orderHistory.length > 0 && (
+                        <div>
+                          <Label className="font-semibold">Order History</Label>
+                          <ul className="list-disc pl-5 mt-1 space-y-1">
+                            {selectedUserForView.orderHistory.map(order => (
+                              <li key={order.orderId}>
+                                Order {order.orderId} on {formatDate(order.date)} - Total: €{order.total.toFixed(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+              <DialogFooter className="sm:justify-end sticky bottom-0 bg-background py-4 px-6 border-t -mx-1 -mb-1">
+                <DialogClose asChild>
+                  <Button variant="outline">Schließen</Button>
+                </DialogClose>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+
+      {/* Edit/Add User Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -268,4 +375,3 @@ export default function UsersPage() {
     </>
   );
 }
-

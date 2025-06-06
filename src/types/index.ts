@@ -3,37 +3,52 @@ export interface User {
   id: string;
   role: 'admin' | 'employee' | 'customer';
   email: string;
-  passwordHash?: string; // Optional as it won't be directly managed in UI
+  passwordHash?: string;
   fullName: string;
-  status: 'active' | 'inactive' | 'suspended' | 'pending_verification'; // Added more status options
-  createdAt?: string; // Made optional to align with new data that might not always have it
-  permissions?: string[]; // Admin only
-  position?: 'driver' | 'baker' | 'cashier' | string; // Employee only, added string for flexibility
-  vehicleType?: 'car' | 'scooter' | 'bike' | string; // Driver only
-  workingHours?: Record<string, string>; // Driver only
-  speciality?: string[]; // Baker only
-  languageSkills?: string[]; // Cashier only
-  phone?: string; // Customer only
-  address?: { // Customer only
+  status: 'active' | 'inactive' | 'suspended' | 'pending_verification';
+  createdAt?: string;
+  // Admin specific
+  permissions?: string[];
+  // Employee specific
+  position?: 'driver' | 'baker' | 'cashier' | string;
+  contractType?: 'full-time' | 'part-time' | 'mini-job' | string;
+  salary?: {
+    type: 'hourly' | 'monthly' | string;
+    amount: number;
+    currency: string;
+  };
+  workingHours?: Record<string, string>;
+  vehicleType?: 'car' | 'scooter' | 'bike' | string; // Primarily for driver
+  notes?: string; // General notes for employee
+  speciality?: string[]; // Primarily for baker
+  languageSkills?: string[]; // Primarily for cashier
+  // Customer specific
+  phone?: string;
+  address?: {
     street: string;
     postalCode: string;
     city: string;
   };
+  orderHistory?: {
+    orderId: string;
+    date: string;
+    total: number;
+  }[];
 }
 
 export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number | Record<string, number>; // Updated: number for single price, object for size-based prices
+  price: number | Record<string, number>; 
   ingredients: string[];
   imageUrl?: string;
-  category?: string; // e.g., Vegetarian, Non-Veg, Special, Pizza, Burger
+  category?: string; 
 }
 
 export interface Order {
   id: string;
-  customerName: string; // Simplified, could be userId
+  customerName: string; 
   items: { productId: string; productName: string; quantity: number; price: number }[];
   totalAmount: number;
   status: 'Pending' | 'Preparing' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
@@ -61,4 +76,3 @@ export type ProductPerformanceData = {
   name: string;
   sales: number;
 };
-

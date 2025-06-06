@@ -3,66 +3,100 @@ import type { User, Product, Order, SalesData, UserTrendData, ProductPerformance
 
 export const placeholderUsers: User[] = [
   {
-    id: "u001",
-    role: "admin",
-    email: "admin@pizzaladen.de",
-    passwordHash: "...",
-    fullName: "Mario Rossi",
-    status: "active",
-    createdAt: "2025-06-06T12:00:00Z",
-    permissions: ["manage_users", "edit_menu", "view_financials"]
+    "id": "u001",
+    "role": "admin",
+    "email": "admin@pizzaladen.de",
+    "passwordHash": "$2a$12$...",
+    "fullName": "Mario Rossi",
+    "status": "active",
+    "createdAt": "2025-06-06T12:00:00Z",
+    "permissions": ["manage_users", "edit_menu", "view_reports"]
   },
   {
-    id: "u002",
-    role: "employee",
-    email: "fahrer@pizzaladen.de",
-    passwordHash: "...",
-    fullName: "Ali Mert",
-    status: "active",
-    position: "driver",
-    vehicleType: "car",
-    workingHours: {
-      monday: "17:00-22:00",
-      friday: "18:00-23:00"
+    "id": "u002",
+    "role": "employee",
+    "email": "fahrer@pizzaladen.de",
+    "passwordHash": "$2a$12$...",
+    "fullName": "Ali Mert",
+    "status": "active",
+    "position": "driver",
+    "contractType": "part-time",
+    "salary": {
+      "type": "hourly",
+      "amount": 12.5,
+      "currency": "EUR"
     },
-    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
-  },
-  {
-    id: "u003",
-    role: "employee",
-    email: "baecker@pizzaladen.de",
-    passwordHash: "...",
-    fullName: "Elena Bauer",
-    status: "active",
-    position: "baker",
-    speciality: ["Pizza", "Pasta"],
-    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
-  },
-  {
-    id: "u004",
-    role: "employee",
-    email: "verkaeufer@pizzaladen.de",
-    passwordHash: "...",
-    fullName: "Tim Schneider",
-    status: "active",
-    position: "cashier",
-    languageSkills: ["Deutsch", "Englisch"],
-    createdAt: "2025-06-06T12:00:00Z", // Added createdAt for consistency
-  },
-  {
-    id: "u005",
-    role: "customer",
-    email: "kunde@example.com",
-    passwordHash: "...",
-    fullName: "Jonas Becker",
-    phone: "+4915123456789",
-    address: {
-      street: "Musterstraße 12",
-      postalCode: "28215",
-      city: "Bremen"
+    "workingHours": {
+      "monday": "17:00-22:00",
+      "friday": "18:00-23:00"
     },
-    status: "active",
-    createdAt: "2025-06-01T18:45:00Z"
+    "vehicleType": "car",
+    "notes": "Eigener PKW wird genutzt"
+  },
+  {
+    "id": "u003",
+    "role": "employee",
+    "email": "baecker@pizzaladen.de",
+    "passwordHash": "$2a$12$...",
+    "fullName": "Elena Bauer",
+    "status": "active",
+    "position": "baker",
+    "contractType": "full-time",
+    "salary": {
+      "type": "monthly",
+      "amount": 2200,
+      "currency": "EUR"
+    },
+    "workingHours": {
+      "monday": "10:00-18:00",
+      "tuesday": "10:00-18:00",
+      "wednesday": "10:00-18:00",
+      "thursday": "10:00-18:00",
+      "friday": "10:00-18:00"
+    },
+    "speciality": ["Pizza", "Ofenpflege"]
+  },
+  {
+    "id": "u004",
+    "role": "employee",
+    "email": "verkauf@pizzaladen.de",
+    "passwordHash": "$2a$12$...",
+    "fullName": "Sophie Lehmann",
+    "status": "active",
+    "position": "cashier",
+    "contractType": "mini-job",
+    "salary": {
+      "type": "hourly",
+      "amount": 12.0,
+      "currency": "EUR"
+    },
+    "workingHours": {
+      "saturday": "11:00-16:00",
+      "sunday": "12:00-17:00"
+    },
+    "languageSkills": ["Deutsch", "Englisch"]
+  },
+  {
+    "id": "u005",
+    "role": "customer",
+    "email": "kunde@example.com",
+    "passwordHash": "$2a$12$...",
+    "fullName": "Jonas Becker",
+    "status": "active",
+    "phone": "+4915123456789",
+    "address": {
+      "street": "Musterstraße 12",
+      "postalCode": "28215",
+      "city": "Bremen"
+    },
+    "createdAt": "2025-06-01T18:45:00Z",
+    "orderHistory": [
+      {
+        "orderId": "ord101",
+        "date": "2025-06-02",
+        "total": 22.50
+      }
+    ]
   }
 ];
 
@@ -793,16 +827,16 @@ export const placeholderProducts: Product[] = [
 export const placeholderOrders: Order[] = [
   {
     id: 'o1',
-    customerName: 'Jonas Becker', // Updated to match new user data
+    customerName: 'Jonas Becker', 
     items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }],
     totalAmount: 9.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
-    deliveryAddress: 'Musterstraße 12, 28215 Bremen' // Updated to match new user data
+    deliveryAddress: 'Musterstraße 12, 28215 Bremen' 
   },
   {
     id: 'o2',
-    customerName: 'Anonymous Guest',
+    customerName: 'Sophie Lehmann', // Matched to placeholderUsers
     items: [
       { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 },
       { productId: 'd1', productName: 'Cola', quantity: 2, price: 2.49 }
@@ -810,16 +844,16 @@ export const placeholderOrders: Order[] = [
     totalAmount: 12.50 + (2 * 2.49),
     status: 'Preparing',
     orderDate: '2023-05-05',
-    deliveryAddress: '456 Oak Ave, Anytown, USA'
+    deliveryAddress: 'Employee address not typically stored on order' // Placeholder
   },
   {
     id: 'o3',
-    customerName: 'Mario Rossi', // Updated to match new user data
+    customerName: 'Mario Rossi', 
     items: [{ productId: 'b1', productName: 'Hamburger (1 Patty)', quantity: 2, price: 5.90 }],
     totalAmount: 11.80,
     status: 'Pending',
     orderDate: '2023-05-06',
-    deliveryAddress: 'Admin Address not specified in user data'
+    deliveryAddress: 'Admin address not specified'
   },
 ];
 
@@ -873,4 +907,3 @@ export const currentInventoryJsonExample = JSON.stringify({
 }, null, 2);
 
     
-
