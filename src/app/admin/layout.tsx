@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
           {children}
         </div>
         <footer className="text-center text-xs text-muted-foreground py-4 mt-auto">
-          developed bei AlaskariTech alle recht vorhanden
+          developed bei <a href="https://www.alaskaritech.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AlaskariTech</a> alle recht vorhanden
         </footer>
       </main>
     </div>
