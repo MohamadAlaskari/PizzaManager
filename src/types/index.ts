@@ -14,7 +14,6 @@ export interface Product {
   ingredients: string[];
   imageUrl?: string;
   category?: string; // e.g., Vegetarian, Non-Veg, Special
-  stock: number;
 }
 
 export interface Order {

@@ -32,7 +32,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -55,7 +54,7 @@ export default function ProductsPage() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!currentProduct) return;
     const { name, value } = e.target;
-    if (name === "price" || name === "stock") {
+    if (name === "price") {
       setCurrentProduct(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else if (name === "ingredients") {
       setCurrentProduct(prev => ({ ...prev, [name]: value.split(',').map(s => s.trim()) }));
@@ -66,7 +65,7 @@ export default function ProductsPage() {
   };
 
   const openAddModal = () => {
-    setCurrentProduct({ name: "", description: "", price: 0, ingredients: [], imageUrl: "", category: "", stock: 0 });
+    setCurrentProduct({ name: "", description: "", price: 0, ingredients: [], imageUrl: "", category: "" });
     setIsFormOpen(true);
   };
 
@@ -128,7 +127,6 @@ export default function ProductsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Stock</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -150,7 +148,6 @@ export default function ProductsPage() {
                   <TableCell>
                     {product.category && <Badge variant="outline">{product.category}</Badge>}
                   </TableCell>
-                  <TableCell>{product.stock}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -219,10 +216,6 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="category" className="text-right">Category</Label>
                 <Input id="category" name="category" value={currentProduct?.category || ""} onChange={handleInputChange} className="col-span-3" placeholder="e.g., Vegetarian, Special" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="stock" className="text-right">Stock</Label>
-                <Input id="stock" name="stock" type="number" value={currentProduct?.stock || 0} onChange={handleInputChange} className="col-span-3" />
                 </div>
             </div>
             <DialogFooter className="sm:justify-end sticky bottom-0 bg-background py-4 px-6 border-t -mx-1 -mb-1">

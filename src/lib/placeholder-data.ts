@@ -18,7 +18,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 50,
   },
   {
     id: 'p2',
@@ -28,7 +27,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 60,
   },
   {
     id: 'p3',
@@ -38,7 +36,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 40,
   },
   {
     id: 'p4',
@@ -48,7 +45,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 45,
   },
   {
     id: 'p5',
@@ -58,7 +54,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 55,
   },
   {
     id: 'p6',
@@ -68,7 +63,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 35,
   },
   {
     id: 'p7',
@@ -78,7 +72,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Zwiebeln', 'Paprika', 'Oliven', 'Pilze'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
-    stock: 30,
   },
   // Burgers
   {
@@ -89,7 +82,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Brötchen', 'Rindfleisch-Patty', 'Salat', 'Tomate', 'Zwiebel', 'Spezialsauce'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
-    stock: 40,
   },
   {
     id: 'b2',
@@ -99,7 +91,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Brötchen', 'Rindfleisch-Patty', 'Cheddar-Käse', 'Salat', 'Tomate', 'Zwiebel', 'Spezialsauce'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
-    stock: 35,
   },
   // Salads
   {
@@ -110,7 +101,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Römersalat', 'Croutons', 'Parmesan', 'Caesar-Dressing'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Salad',
-    stock: 25,
   },
   // Drinks
   {
@@ -121,7 +111,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Wasser', 'Zucker', 'Kohlensäure', 'Farbstoff', 'Aromen'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Getränke',
-    stock: 100,
   },
   {
     id: 'd2',
@@ -131,7 +120,6 @@ export const placeholderProducts: Product[] = [
     ingredients: ['Mineralwasser'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Getränke',
-    stock: 100,
   },
 ];
 
