@@ -2,7 +2,7 @@
 // src/app/admin/products/page.tsx
 "use client";
 
-import { PlusCircle, Pizza as PizzaIcon, MoreHorizontal, Edit, Trash2, PackageSearch } from "lucide-react";
+import { PlusCircle, Pizza as PizzaIcon, MoreHorizontal, Edit, Trash2, PackageSearch, Eye } from "lucide-react";
 import Image from "next/image";
 import { PageTitle } from "@/components/shared/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const initialProductState: Partial<Product> = {
   name: "",
   description: "",
-  price: 0, 
+  price: 0,
   ingredients: [],
   imageUrl: "",
   category: ""
@@ -58,6 +58,10 @@ export default function ProductsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(initialProductState);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  
+  const [isViewDetailModalOpen, setIsViewDetailModalOpen] = useState(false);
+  const [selectedProductForView, setSelectedProductForView] = useState<Product | null>(null);
+
 
   const categories = useMemo(() => {
     const uniqueCategories = new Set(products.map(p => p.category).filter(Boolean) as string[]);
@@ -93,8 +97,8 @@ export default function ProductsPage() {
     if (!currentProduct) return;
     const { name, value } = e.target;
 
-    if (name.startsWith("price-")) { 
-      let keyName = name.substring("price-".length); 
+    if (name.startsWith("price-")) {
+      let keyName = name.substring("price-".length);
       if (keyName === "1Patty") keyName = "1 Patty";
       if (keyName === "2Patty") keyName = "2 Patty";
       
@@ -109,7 +113,7 @@ export default function ProductsPage() {
           },
         };
       });
-    } else if (name === "price") { 
+    } else if (name === "price") {
         setCurrentProduct(prev => ({ ...prev, price: parseFloat(value) || 0 }));
     } else if (name === "ingredients") {
       setCurrentProduct(prev => ({ ...prev, [name]: value.split(',').map(s => s.trim()) }));
@@ -137,7 +141,7 @@ export default function ProductsPage() {
 
 
   const openAddModal = () => {
-    setCurrentProduct(JSON.parse(JSON.stringify(initialProductState))); 
+    setCurrentProduct(JSON.parse(JSON.stringify(initialProductState)));
     setIsFormOpen(true);
   };
 
@@ -145,15 +149,21 @@ export default function ProductsPage() {
     setCurrentProduct({ ...product });
     setIsFormOpen(true);
   };
+  
+  const openViewDetailModal = (product: Product) => {
+    setSelectedProductForView(product);
+    setIsViewDetailModalOpen(true);
+  };
+
 
   const handleSaveProduct = () => {
-    if (!currentProduct || !currentProduct.name) return; 
+    if (!currentProduct || !currentProduct.name) return;
 
     let finalPrice = currentProduct.price;
     if (currentProduct.category === 'Pizza' || currentProduct.category === 'spacial pizza') {
       if (typeof currentProduct.price !== 'object' || currentProduct.price === null) {
         finalPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
-      } else { 
+      } else {
         finalPrice = {
           "24cm": (currentProduct.price as Record<string, number>)["24cm"] || 0,
           "30cm": (currentProduct.price as Record<string, number>)["30cm"] || 0,
@@ -181,11 +191,11 @@ export default function ProductsPage() {
     const productToSave = { ...currentProduct, price: finalPrice };
 
 
-    if (currentProduct?.id) { 
+    if (currentProduct?.id) {
       setProducts(products.map(p => p.id === productToSave.id ? productToSave as Product : p));
-    } else { 
+    } else {
       const newProduct: Product = {
-        id: `p${products.length + 1 + Math.floor(Math.random()*1000)}`, 
+        id: `p${products.length + 1 + Math.floor(Math.random()*1000)}`,
         ...productToSave
       } as Product;
       setProducts([...products, newProduct]);
@@ -213,6 +223,24 @@ export default function ProductsPage() {
         if (typeof patty1Price === 'number' && patty1Price > 0) {
           return `Ab €${patty1Price.toFixed(2)}`;
         }
+      }
+    }
+    return 'N/A';
+  };
+  
+  const renderPriceDetailsInModal = (price: Product['price'], category?: string): string => {
+    if (typeof price === 'number') {
+      return `€${price.toFixed(2)}`;
+    }
+    if (typeof price === 'object' && price !== null) {
+      if (category === 'Pizza' || category === 'spacial pizza') {
+        return Object.entries(price)
+          .map(([size, pVal]) => `${size}: €${(pVal as number).toFixed(2)}`)
+          .join(' / ');
+      } else if (category === 'Burger') {
+        return Object.entries(price)
+          .map(([patty, pVal]) => `${patty}: €${(pVal as number).toFixed(2)}`)
+          .join(' / ');
       }
     }
     return 'N/A';
@@ -309,6 +337,9 @@ export default function ProductsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => openViewDetailModal(product)}>
+                          <Eye className="mr-2 h-4 w-4" /> Anzeigen
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openEditModal(product)}>
                           <Edit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
@@ -333,6 +364,80 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
+      {/* View Product Detail Modal */}
+      <Dialog open={isViewDetailModalOpen} onOpenChange={setIsViewDetailModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-1">
+              <DialogHeader>
+                <DialogTitle>Produktdetails: {selectedProductForView?.name}</DialogTitle>
+              </DialogHeader>
+              {selectedProductForView && (
+                <div className="grid gap-4 py-4">
+                  <div className="flex justify-center">
+                    <Image
+                      src={selectedProductForView.imageUrl || "https://placehold.co/300x200.png"}
+                      alt={selectedProductForView.name}
+                      width={300}
+                      height={200}
+                      className="rounded-md object-cover"
+                      data-ai-hint={
+                        selectedProductForView.category === 'Pizza' ? "pizza food" : 
+                        selectedProductForView.category === 'spacial pizza' ? "special pizza" :
+                        selectedProductForView.category === 'pizza brötchen' ? "pizza bread" :
+                        selectedProductForView.category === 'Burger' ? "burger food" : 
+                        selectedProductForView.category === 'finger food' ? "finger food appetizer" :
+                        selectedProductForView.category === 'Calzone' ? "calzone food" :
+                        selectedProductForView.category === 'Rollo' ? "rollo wrap" :
+                        selectedProductForView.category === 'Baguette' ? "baguette sandwich" :
+                        selectedProductForView.category === 'Snacks' ? "snacks item" :
+                        selectedProductForView.category === 'Salat' ? "salad food" :
+                        selectedProductForView.category === 'Getränke' ? "drink beverage" : 
+                        selectedProductForView.category === 'Eis' ? "ice cream" :
+                        selectedProductForView.category === 'Menu' ? "meal combo" :
+                        "food item"
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Name</Label>
+                    <p>{selectedProductForView.name}</p>
+                  </div>
+                  {selectedProductForView.description && (
+                    <div>
+                      <Label className="font-semibold">Beschreibung</Label>
+                      <p>{selectedProductForView.description}</p>
+                    </div>
+                  )}
+                  {selectedProductForView.category && (
+                    <div>
+                      <Label className="font-semibold">Kategorie</Label>
+                      <p><Badge variant="outline">{selectedProductForView.category}</Badge></p>
+                    </div>
+                  )}
+                  <div>
+                    <Label className="font-semibold">Preis</Label>
+                    <p>{renderPriceDetailsInModal(selectedProductForView.price, selectedProductForView.category)}</p>
+                  </div>
+                  {selectedProductForView.ingredients && selectedProductForView.ingredients.length > 0 && (
+                    <div>
+                      <Label className="font-semibold">Zutaten</Label>
+                      <p>{selectedProductForView.ingredients.join(', ')}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <DialogFooter className="sm:justify-end sticky bottom-0 bg-background py-4 px-6 border-t -mx-1 -mb-1">
+                <DialogClose asChild>
+                  <Button variant="outline">Schließen</Button>
+                </DialogClose>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit/Add Product Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-lg">
         <ScrollArea className="max-h-[80vh]">
