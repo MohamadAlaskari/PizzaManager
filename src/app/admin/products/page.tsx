@@ -2,7 +2,7 @@
 // src/app/admin/products/page.tsx
 "use client";
 
-import { PlusCircle, Pizza as PizzaIcon, MoreHorizontal, Edit, Trash2, PackageSearch, Eye } from "lucide-react";
+import { PlusCircle, Pizza as PizzaIcon, MoreHorizontal, Edit, Trash2, PackageSearch, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { PageTitle } from "@/components/shared/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { placeholderProducts } from "@/lib/placeholder-data";
 import type { Product } from "@/types";
-import { useState, type ChangeEvent, useMemo } from "react";
+import { useState, type ChangeEvent, useMemo, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -70,6 +70,9 @@ export default function ProductsPage() {
   const [isViewDetailModalOpen, setIsViewDetailModalOpen] = useState(false);
   const [selectedProductForView, setSelectedProductForView] = useState<Product | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
 
   const categories = useMemo(() => {
     const uniqueCategories = new Set(products.map(p => p.category).filter(Boolean) as string[]);
@@ -81,6 +84,7 @@ export default function ProductsPage() {
   }, [products]);
 
   const filteredProducts = useMemo(() => {
+    setCurrentPage(1); // Reset to first page when filters change
     return products.filter(product => {
       const matchesCategoryTab = selectedCategory === "All" || product.category === selectedCategory;
       if (!matchesCategoryTab) {
@@ -101,6 +105,27 @@ export default function ProductsPage() {
       return nameMatch || descriptionMatch || categoryTextMatch;
     });
   }, [products, selectedCategory, searchTerm]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+
+  const nextPage = () => {
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  };
+
+  const prevPage = () => {
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  };
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (totalPages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
 
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -325,9 +350,9 @@ export default function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product, index) => (
+              {currentItems.map((product, index) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell className="font-medium">{indexOfFirstItem + index + 1}</TableCell>
                   <TableCell>
                     <Image
                       src={product.imageUrl || "https://placehold.co/64x64.png"}
@@ -390,6 +415,31 @@ export default function ProductsPage() {
               <PackageSearch className="w-16 h-16 mb-4" />
               <p className="text-lg">No products found.</p>
               <p>Try adjusting your search or filter criteria.</p>
+            </div>
+          )}
+          {totalPages > 0 && (
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={prevPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           )}
         </CardContent>
