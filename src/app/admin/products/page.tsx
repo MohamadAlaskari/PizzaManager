@@ -59,7 +59,8 @@ export default function ProductsPage() {
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -91,12 +92,12 @@ export default function ProductsPage() {
       setCurrentProduct(prev => {
         if (!prev) return null;
         let newPrice = prev.price;
-        if (newCategory === "Pizza" && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["24cm"] ) ) ) {
+        if ((newCategory === "Pizza" || newCategory === "spacial pizza") && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["24cm"] ) ) ) {
           newPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
         } else if (newCategory === "Burger" && (typeof prev.price === 'number' || !prev.price || (typeof prev.price === 'object' && !prev.price["1 Patty"] ) ) ) {
           newPrice = { "1 Patty": 0, "2 Patty": 0 };
         }
-        else if ((prev.category === "Pizza" || prev.category === "Burger") && newCategory !== "Pizza" && newCategory !== "Burger" && typeof prev.price === 'object' && prev.price) {
+        else if ((prev.category === "Pizza" || prev.category === "spacial pizza" || prev.category === "Burger") && newCategory !== "Pizza" && newCategory !== "spacial pizza" && newCategory !== "Burger" && typeof prev.price === 'object' && prev.price) {
           const priceValues = Object.values(prev.price).filter(p => typeof p === 'number') as number[];
           newPrice = priceValues.length > 0 ? Math.min(...priceValues) : 0;
         }
@@ -123,7 +124,7 @@ export default function ProductsPage() {
     if (!currentProduct || !currentProduct.name) return; 
 
     let finalPrice = currentProduct.price;
-    if (currentProduct.category === 'Pizza') {
+    if (currentProduct.category === 'Pizza' || currentProduct.category === 'spacial pizza') {
       if (typeof currentProduct.price !== 'object' || currentProduct.price === null) {
         finalPrice = { "24cm": 0, "30cm": 0, "40cm": 0 };
       } else { 
@@ -176,7 +177,7 @@ export default function ProductsPage() {
       return `€${price.toFixed(2)}`;
     }
     if (typeof price === 'object' && price !== null) {
-      if (category === 'Pizza') {
+      if (category === 'Pizza' || category === 'spacial pizza') {
         const priceValues = Object.values(price).filter(p => typeof p === 'number' && p > 0) as number[];
         if (priceValues.length > 0) {
           return `Ab €${Math.min(...priceValues).toFixed(2)}`;
@@ -210,7 +211,7 @@ export default function ProductsPage() {
           <CardDescription>View, edit, or add new products.</CardDescription>
           <div className="mt-4">
             <Input
-              placeholder="Search products..."
+              placeholder="Search products by name, description or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
@@ -242,10 +243,18 @@ export default function ProductsPage() {
                       className="rounded-md object-cover"
                       data-ai-hint={
                         product.category === 'Pizza' ? "pizza food" : 
+                        product.category === 'spacial pizza' ? "special pizza" :
+                        product.category === 'pizza brötchen' ? "pizza bread" :
                         product.category === 'Burger' ? "burger food" : 
-                        product.category === 'Salad' ? "salad food" :
+                        product.category === 'finger food' ? "finger food appetizer" :
                         product.category === 'Calzone' ? "calzone food" :
+                        product.category === 'Rollo' ? "rollo wrap" :
+                        product.category === 'Baguette' ? "baguette sandwich" :
+                        product.category === 'Snacks' ? "snacks item" :
+                        product.category === 'Salat' ? "salad food" :
                         product.category === 'Getränke' ? "drink beverage" : 
+                        product.category === 'Eis' ? "ice cream" :
+                        product.category === 'Menu' ? "meal combo" :
                         "food item"
                       }
                     />
@@ -314,7 +323,7 @@ export default function ProductsPage() {
                   <Input id="category" name="category" value={currentProduct?.category || ""} onChange={handleInputChange} className="col-span-3" placeholder="e.g., Pizza, Burger, Salad" />
                 </div>
 
-                {currentProduct?.category === 'Pizza' ? (
+                {(currentProduct?.category === 'Pizza' || currentProduct?.category === 'spacial pizza') ? (
                   <>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="price-24cm" className="text-right">Price (24cm)</Label>

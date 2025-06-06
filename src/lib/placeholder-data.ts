@@ -263,6 +263,31 @@ const newPizzas: Product[] = [
   },
 ];
 
+const specialPizzas: Product[] = [
+  {
+    id: 'sp1',
+    name: 'Vier Käse Spezial',
+    description: 'Eine luxuriöse Mischung aus Mozzarella, Gorgonzola, Parmesan und Feta.',
+    price: { "24cm": 12.00, "30cm": 15.50, "40cm": 20.00 },
+    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Gorgonzola', 'Parmesan', 'Feta'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'spacial pizza',
+  },
+];
+
+const pizzaBroetchen: Product[] = [
+  {
+    id: 'pb1',
+    name: 'Pizzabrötchen mit Kräuterbutter',
+    description: '6 Stück hausgemachte Pizzabrötchen mit Kräuterbutter.',
+    price: 4.50,
+    ingredients: ['Pizzateig', 'Kräuterbutter'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'pizza brötchen',
+  },
+];
+
+
 const newBurgers: Product[] = [
   {
     id: 'b1',
@@ -308,6 +333,18 @@ const newBurgers: Product[] = [
     ingredients: ["100g Patty", "Eisbergsalat", "Tomaten", "Gurke", "Zwiebeln", "Jalapenos", "Soße", "Käse"],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
+  },
+];
+
+const fingerFoods: Product[] = [
+  {
+    id: 'ff1',
+    name: 'Chicken Wings',
+    description: '6 Stück knusprige Chicken Wings mit Dip.',
+    price: 6.50,
+    ingredients: ['Hähnchenflügel', 'Gewürze', 'Dip'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'finger food',
   },
 ];
 
@@ -377,23 +414,68 @@ const newCalzones: Product[] = [
   },
 ];
 
-
-const otherProducts: Product[] = [
-  // Salads
+const rollos: Product[] = [
   {
+    id: 'rl1',
+    name: 'Döner Rollo',
+    description: 'Gefüllt mit Dönerfleisch, Salat und Sauce.',
+    price: 7.00,
+    ingredients: ['Fladenbrot', 'Dönerfleisch', 'Salatmix', 'Sauce'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Rollo',
+  },
+];
+
+const baguettes: Product[] = [
+  {
+    id: 'bg1',
+    name: 'Salami Baguette',
+    description: 'Frisches Baguette mit Salami, Käse und Salat.',
+    price: 6.00,
+    ingredients: ['Baguettebrot', 'Salami', 'Käse', 'Salat'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+];
+
+const snacks: Product[] = [
+  {
+    id: 'sn1',
+    name: 'Pommes Frites',
+    description: 'Klassische Pommes mit Ketchup oder Mayo.',
+    price: 3.50,
+    ingredients: ['Kartoffeln', 'Pflanzenöl', 'Salz'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Snacks',
+  },
+];
+
+const salate: Product[] = [
+ {
     id: 's1',
-    name: 'Caesar Salad',
+    name: 'Caesar Salat',
     description: 'Römersalat mit Croutons, Parmesan und Caesar-Dressing.',
     price: 6.99,
     ingredients: ['Römersalat', 'Croutons', 'Parmesan', 'Caesar-Dressing'],
     imageUrl: 'https://placehold.co/300x200.png',
-    category: 'Salad',
+    category: 'Salat',
   },
-  // Drinks
+  {
+    id: 's2',
+    name: 'Gemischter Salat',
+    description: 'Frischer gemischter Salat der Saison.',
+    price: 5.50,
+    ingredients: ['Kopfsalat', 'Tomaten', 'Gurken', 'Mais', 'Dressing'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Salat',
+  },
+];
+
+const getraenke: Product[] = [
   {
     id: 'd1',
     name: 'Cola',
-    description: 'Erfrischende Coca-Cola.',
+    description: 'Erfrischende Coca-Cola 0,33l.',
     price: 2.49,
     ingredients: ['Wasser', 'Zucker', 'Kohlensäure', 'Farbstoff', 'Aromen'],
     imageUrl: 'https://placehold.co/300x200.png',
@@ -402,7 +484,7 @@ const otherProducts: Product[] = [
   {
     id: 'd2',
     name: 'Wasser Still',
-    description: 'Natürliches Mineralwasser ohne Kohlensäure.',
+    description: 'Natürliches Mineralwasser ohne Kohlensäure 0,5l.',
     price: 1.99,
     ingredients: ['Mineralwasser'],
     imageUrl: 'https://placehold.co/300x200.png',
@@ -410,7 +492,46 @@ const otherProducts: Product[] = [
   },
 ];
 
-export const placeholderProducts: Product[] = [...newPizzas, ...newBurgers, ...newCalzones, ...otherProducts];
+const eis: Product[] = [
+  {
+    id: 'e1',
+    name: 'Schokoladeneis',
+    description: 'Kugel Schokoladeneis.',
+    price: 1.80,
+    ingredients: ['Milch', 'Zucker', 'Kakao'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Eis',
+  },
+];
+
+const menues: Product[] = [
+  {
+    id: 'm1',
+    name: 'Pizza Menü',
+    description: 'Eine Pizza (30cm) nach Wahl + 1 Getränk.',
+    price: 13.00,
+    ingredients: ['Pizza nach Wahl', 'Getränk nach Wahl'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Menu',
+  },
+];
+
+
+export const placeholderProducts: Product[] = [
+    ...newPizzas, 
+    ...specialPizzas,
+    ...pizzaBroetchen,
+    ...newBurgers, 
+    ...fingerFoods,
+    ...newCalzones, 
+    ...rollos,
+    ...baguettes,
+    ...snacks,
+    ...salate, 
+    ...getraenke,
+    ...eis,
+    ...menues
+];
 
 export const placeholderOrders: Order[] = [
   {
@@ -466,7 +587,7 @@ export const placeholderUserTrendData: UserTrendData[] = [
 export const placeholderProductPerformanceData: ProductPerformanceData[] = [
   { name: 'Margarita', sales: 120 }, 
   { name: 'Salami', sales: 95 }, 
-  { name: 'Hamburger', sales: 80 }, // Updated to Hamburger
+  { name: 'Hamburger', sales: 80 }, 
   { name: 'Chicken', sales: 60 }, 
   { name: 'Cola', sales: 150 },
 ];
