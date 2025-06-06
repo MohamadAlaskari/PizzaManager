@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -10,10 +11,10 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | Record<string, number>; // Updated: number for single price, object for size-based prices
   ingredients: string[];
   imageUrl?: string;
-  category?: string; // e.g., Vegetarian, Non-Veg, Special
+  category?: string; // e.g., Vegetarian, Non-Veg, Special, Pizza, Burger
 }
 
 export interface Order {

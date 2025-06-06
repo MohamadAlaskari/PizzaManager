@@ -12,63 +12,27 @@ export const placeholderProducts: Product[] = [
   // Pizzas
   {
     id: 'p1',
-    name: 'Margherita 24cm',
+    name: 'Margherita',
     description: 'Klassischer Genuss mit 100% echtem Mozzarella Käse.',
-    price: 8.99,
+    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
   {
     id: 'p2',
-    name: 'Margherita 30cm',
-    description: 'Klassischer Genuss mit 100% echtem Mozzarella Käse.',
-    price: 10.99,
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
+    name: 'Salami Pizza',
+    description: 'Ein Traum für Fleischliebhaber mit würziger Salami.',
+    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
+    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
   },
   {
     id: 'p3',
-    name: 'Margherita 40cm',
-    description: 'Klassischer Genuss mit 100% echtem Mozzarella Käse.',
-    price: 14.99,
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Basilikum'],
-    imageUrl: 'https://placehold.co/300x200.png',
-    category: 'Pizza',
-  },
-  {
-    id: 'p4',
-    name: 'Salami Pizza 24cm',
-    description: 'Ein Traum für Fleischliebhaber mit würziger Salami.',
-    price: 9.99,
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
-    imageUrl: 'https://placehold.co/300x200.png',
-    category: 'Pizza',
-  },
-  {
-    id: 'p5',
-    name: 'Salami Pizza 30cm',
-    description: 'Ein Traum für Fleischliebhaber mit würziger Salami.',
-    price: 12.99,
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
-    imageUrl: 'https://placehold.co/300x200.png',
-    category: 'Pizza',
-  },
-  {
-    id: 'p6',
-    name: 'Salami Pizza 40cm',
-    description: 'Ein Traum für Fleischliebhaber mit würziger Salami.',
-    price: 16.99,
-    ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Salami'],
-    imageUrl: 'https://placehold.co/300x200.png',
-    category: 'Pizza',
-  },
-  {
-    id: 'p7',
-    name: 'Veggie Supreme 24cm',
+    name: 'Veggie Supreme',
     description: 'Beladen mit frischem Gemüse und Mozzarella.',
-    price: 9.49,
+    price: { "24cm": 12.00, "30cm": 15.00, "40cm": 18.00 },
     ingredients: ['Pizzateig', 'Tomatensauce', 'Mozzarella', 'Zwiebeln', 'Paprika', 'Oliven', 'Pilze'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Pizza',
@@ -127,8 +91,8 @@ export const placeholderOrders: Order[] = [
   {
     id: 'o1',
     customerName: 'Charlie Customer',
-    items: [{ productId: 'p2', productName: 'Margherita 30cm', quantity: 1, price: 10.99 }],
-    totalAmount: 10.99,
+    items: [{ productId: 'p1', productName: 'Margherita 30cm', quantity: 1, price: 15.00 }], // Assuming p1 is Margherita, price for 30cm
+    totalAmount: 15.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
     deliveryAddress: '123 Main St, Anytown, USA'
@@ -137,10 +101,10 @@ export const placeholderOrders: Order[] = [
     id: 'o2',
     customerName: 'Anonymous Guest',
     items: [
-      { productId: 'p5', productName: 'Salami Pizza 30cm', quantity: 1, price: 12.99 },
+      { productId: 'p2', productName: 'Salami Pizza 30cm', quantity: 1, price: 15.00 }, // Assuming p2 is Salami, price for 30cm
       { productId: 'd1', productName: 'Cola', quantity: 2, price: 2.49 }
     ],
-    totalAmount: 12.99 + (2 * 2.49),
+    totalAmount: 15.00 + (2 * 2.49),
     status: 'Preparing',
     orderDate: '2023-05-05',
     deliveryAddress: '456 Oak Ave, Anytown, USA'
@@ -175,10 +139,10 @@ export const placeholderUserTrendData: UserTrendData[] = [
 ];
 
 export const placeholderProductPerformanceData: ProductPerformanceData[] = [
-  { name: 'Margherita 30cm', sales: 120 },
-  { name: 'Salami Pizza 30cm', sales: 95 },
+  { name: 'Margherita', sales: 120 }, // Consolidated name
+  { name: 'Salami Pizza', sales: 95 }, // Consolidated name
   { name: 'Classic Burger', sales: 80 },
-  { name: 'Veggie Supreme 24cm', sales: 60 },
+  { name: 'Veggie Supreme', sales: 60 }, // Consolidated name
   { name: 'Cola', sales: 150 },
 ];
 
@@ -196,14 +160,11 @@ export const placeholderInventoryData = [
 ];
 
 export const pastSalesJsonExample = JSON.stringify([
-  {"date": "2024-07-01", "pizzaType": "Margherita 30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Basilikum": 0.01}},
-  {"date": "2024-07-01", "pizzaType": "Salami Pizza 30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Salami": 0.1}},
-  {"date": "2024-07-02", "pizzaType": "Margherita 24cm", "ingredientsUsed": {"Pizzateig": 0.7, "Tomatensauce": 0.15, "Mozzarella": 0.1, "Basilikum": 0.007}},
+  {"date": "2024-07-01", "pizzaType": "Margherita", "size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Basilikum": 0.01}},
+  {"date": "2024-07-01", "pizzaType": "Salami Pizza","size": "30cm", "ingredientsUsed": {"Pizzateig": 1, "Tomatensauce": 0.2, "Mozzarella": 0.15, "Salami": 0.1}},
+  {"date": "2024-07-02", "pizzaType": "Margherita", "size": "24cm", "ingredientsUsed": {"Pizzateig": 0.7, "Tomatensauce": 0.15, "Mozzarella": 0.1, "Basilikum": 0.007}},
 ], null, 2);
 
 export const currentInventoryJsonExample = JSON.stringify({
   "Pizzateig": 100, "Tomatensauce": 20, "Mozzarella": 30, "Basilikum": 5, "Salami": 15, "Burger Buns": 30, "Rindfleisch Patties": 25
 }, null, 2);
-
-
-    
