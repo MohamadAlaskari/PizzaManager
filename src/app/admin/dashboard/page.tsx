@@ -1,3 +1,5 @@
+"use client";
+
 import { BarChart, DollarSign, Users, ShoppingCart, LineChart as LucideLineChart } from "lucide-react";
 import { PageTitle } from "@/components/shared/PageTitle";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
