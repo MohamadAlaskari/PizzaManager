@@ -7,6 +7,7 @@ import { PageTitle } from "@/components/shared/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -44,30 +45,128 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { placeholderUsers } from "@/lib/placeholder-data";
 import type { User } from "@/types";
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+const initialUserState: User = {
+  id: "",
+  role: "customer",
+  email: "",
+  fullName: "",
+  status: "active",
+  createdAt: new Date().toISOString(),
+  permissions: [],
+  position: "",
+  contractType: "",
+  salary: { type: "hourly", amount: 0, currency: "EUR" },
+  workingHours: {},
+  vehicleType: "",
+  notes: "",
+  speciality: [],
+  languageSkills: [],
+  phone: "",
+  address: { street: "", postalCode: "", city: "" },
+  orderHistory: [],
+};
+
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(placeholderUsers);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
+  const [currentUser, setCurrentUser] = useState<Partial<User>>(JSON.parse(JSON.stringify(initialUserState)));
   const [isViewDetailModalOpen, setIsViewDetailModalOpen] = useState(false);
   const [selectedUserForView, setSelectedUserForView] = useState<User | null>(null);
+  const { toast } = useToast();
+
+  // State for complex inputs in the form
+  const [permissionsInput, setPermissionsInput] = useState("");
+  const [specialityInput, setSpecialityInput] = useState("");
+  const [languageSkillsInput, setLanguageSkillsInput] = useState("");
+  const [workingHoursInput, setWorkingHoursInput] = useState("");
+
+
+  useEffect(() => {
+    if (currentUser?.permissions) setPermissionsInput(currentUser.permissions.join(', '));
+    else setPermissionsInput("");
+
+    if (currentUser?.speciality) setSpecialityInput(currentUser.speciality.join(', '));
+    else setSpecialityInput("");
+
+    if (currentUser?.languageSkills) setLanguageSkillsInput(currentUser.languageSkills.join(', '));
+    else setLanguageSkillsInput("");
+    
+    if (currentUser?.workingHours) setWorkingHoursInput(JSON.stringify(currentUser.workingHours, null, 2));
+    else setWorkingHoursInput(JSON.stringify({}, null, 2));
+
+  }, [currentUser]);
+
 
   const filteredUsers = users.filter(user =>
     user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleGenericInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!currentUser) return;
+    const { name, value } = e.target as { name: keyof User, value: string };
+    setCurrentUser(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!currentUser) return;
     const { name, value } = e.target;
-    setCurrentUser(prev => ({ ...prev, [name]: value }));
+    const field = name.split('.')[1] as keyof User['address'];
+
+    setCurrentUser(prev => {
+      if (!prev) return null;
+      const currentAddress = prev.address || initialUserState.address;
+      return {
+        ...prev,
+        address: {
+          ...currentAddress,
+          [field]: value,
+        },
+      };
+    });
+  };
+
+  const handleSalaryChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!currentUser) return;
+    const { name, value } = e.target;
+    const field = name.split('.')[1] as keyof NonNullable<User['salary']>;
+
+    setCurrentUser(prev => {
+      if (!prev) return null;
+      const currentSalary = prev.salary || initialUserState.salary;
+      return {
+        ...prev,
+        salary: {
+          ...currentSalary,
+          [field]: field === 'amount' ? parseFloat(value) || 0 : value,
+        },
+      };
+    });
   };
   
   const handleRoleChange = (value: User['role']) => {
     if (!currentUser) return;
-    setCurrentUser(prev => ({ ...prev, role: value }));
+    setCurrentUser(prev => ({ 
+        ...prev, 
+        role: value,
+        // Reset role-specific fields when role changes to avoid data mismatch
+        permissions: value === 'admin' ? prev?.permissions || [] : [],
+        position: value === 'employee' ? prev?.position || "" : "",
+        contractType: value === 'employee' ? prev?.contractType || "" : "",
+        salary: value === 'employee' ? prev?.salary || initialUserState.salary : undefined,
+        workingHours: value === 'employee' ? prev?.workingHours || {} : undefined,
+        vehicleType: value === 'employee' ? prev?.vehicleType || "" : "",
+        notes: value === 'employee' ? prev?.notes || "" : "",
+        speciality: value === 'employee' ? prev?.speciality || [] : [],
+        languageSkills: value === 'employee' ? prev?.languageSkills || [] : [],
+        phone: value === 'customer' ? prev?.phone || "" : "",
+        address: value === 'customer' ? prev?.address || initialUserState.address : undefined,
+    }));
   };
 
   const handleStatusChange = (value: User['status']) => {
@@ -76,12 +175,25 @@ export default function UsersPage() {
   }
 
   const openAddModal = () => {
-    setCurrentUser({ fullName: "", email: "", role: "customer", status: "active" });
+    const newUserScaffold = JSON.parse(JSON.stringify(initialUserState));
+    delete newUserScaffold.id; // Ensure no ID for a new user
+    newUserScaffold.createdAt = new Date().toISOString();
+    setCurrentUser(newUserScaffold);
+    setPermissionsInput("");
+    setSpecialityInput("");
+    setLanguageSkillsInput("");
+    setWorkingHoursInput(JSON.stringify({}, null, 2));
     setIsFormOpen(true);
   };
 
   const openEditModal = (user: User) => {
-    setCurrentUser({ ...user });
+    const userToEdit = { ...JSON.parse(JSON.stringify(initialUserState)), ...user };
+    setCurrentUser(userToEdit);
+    // Initialize input strings from user data
+    setPermissionsInput(user.permissions?.join(', ') || "");
+    setSpecialityInput(user.speciality?.join(', ') || "");
+    setLanguageSkillsInput(user.languageSkills?.join(', ') || "");
+    setWorkingHoursInput(JSON.stringify(user.workingHours || {}, null, 2));
     setIsFormOpen(true);
   };
   
@@ -90,28 +202,57 @@ export default function UsersPage() {
     setIsViewDetailModalOpen(true);
   };
 
-  const handleSaveUser = () => {
+ const handleSaveUser = () => {
     if (!currentUser || !currentUser.fullName || !currentUser.email || !currentUser.role || !currentUser.status) {
-      alert("Please fill all required fields.");
+      toast({ title: "Fehler", description: "Bitte füllen Sie alle erforderlichen Felder aus.", variant: "destructive" });
       return;
     }
+
+    let parsedWorkingHours = currentUser.workingHours;
+    if (currentUser.role === 'employee') {
+        try {
+            parsedWorkingHours = JSON.parse(workingHoursInput);
+        } catch (error) {
+            toast({ title: "Ungültiges JSON", description: "Das Format der Arbeitszeiten ist ungültig.", variant: "destructive" });
+            return;
+        }
+    }
+    
+    const finalUserData: User = {
+      ...initialUserState, // Ensure all fields are present
+      ...currentUser,
+      id: currentUser.id || `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`,
+      createdAt: currentUser.createdAt || new Date().toISOString(),
+      permissions: currentUser.role === 'admin' ? permissionsInput.split(',').map(s => s.trim()).filter(s => s) : [],
+      speciality: currentUser.role === 'employee' ? specialityInput.split(',').map(s => s.trim()).filter(s => s) : [],
+      languageSkills: currentUser.role === 'employee' ? languageSkillsInput.split(',').map(s => s.trim()).filter(s => s) : [],
+      workingHours: currentUser.role === 'employee' ? parsedWorkingHours : undefined,
+      // Ensure only relevant fields for the role are kept, or cleared if role changed
+      position: currentUser.role === 'employee' ? currentUser.position : undefined,
+      contractType: currentUser.role === 'employee' ? currentUser.contractType : undefined,
+      salary: currentUser.role === 'employee' ? currentUser.salary : undefined,
+      vehicleType: currentUser.role === 'employee' ? currentUser.vehicleType : undefined,
+      notes: currentUser.role === 'employee' ? currentUser.notes : undefined,
+      phone: currentUser.role === 'customer' ? currentUser.phone : undefined,
+      address: currentUser.role === 'customer' ? currentUser.address : undefined,
+      orderHistory: currentUser.role === 'customer' ? currentUser.orderHistory : [], // Order history is not editable here
+    };
   
     if (currentUser?.id) { 
-      setUsers(users.map(u => u.id === currentUser.id ? currentUser as User : u));
+      setUsers(users.map(u => u.id === finalUserData.id ? finalUserData : u));
+      toast({ title: "Benutzer aktualisiert", description: `${finalUserData.fullName} wurde erfolgreich aktualisiert.` });
     } else { 
-      const newUser: User = {
-        id: `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`, 
-        createdAt: new Date().toISOString(),
-        ...currentUser
-      } as User; 
-      setUsers([...users, newUser]);
+      setUsers([...users, finalUserData]);
+      toast({ title: "Benutzer hinzugefügt", description: `${finalUserData.fullName} wurde erfolgreich erstellt.` });
     }
     setIsFormOpen(false);
-    setCurrentUser(null);
+    setCurrentUser(JSON.parse(JSON.stringify(initialUserState))); // Reset form
   };
+
 
   const handleDeleteUser = (userId: string) => {
     setUsers(users.filter(u => u.id !== userId));
+    toast({ title: "Benutzer gelöscht", description: `Der Benutzer wurde gelöscht.` });
   };
 
   const formatDate = (dateString?: string) => {
@@ -123,7 +264,7 @@ export default function UsersPage() {
     }
   };
 
-  const getStatusBadgeVariant = (status: User['status']): "default" | "secondary" | "outline" | "destructive" => {
+  const getStatusBadgeVariant = (status?: User['status']): "default" | "secondary" | "outline" | "destructive" => {
     switch (status) {
       case 'active': return 'default'; 
       case 'inactive': return 'secondary'; 
@@ -134,29 +275,46 @@ export default function UsersPage() {
   };
 
   const renderDetailItem = (label: string, value?: string | string[] | number | null | Record<string, any> | any[]) => {
-    if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
+    if (value === undefined || value === null || (typeof value === 'string' && value.trim() === "") || (Array.isArray(value) && value.length === 0)) {
       return null;
     }
     let displayValue: React.ReactNode;
     if (Array.isArray(value)) {
       displayValue = value.join(', ');
-    } else if (typeof value === 'object') {
-      displayValue = (
-        <ul className="list-disc pl-5 space-y-1">
-          {Object.entries(value).map(([key, val]) => (
-            <li key={key}>
-              <span className="font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}:</span> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-            </li>
-          ))}
-        </ul>
-      );
+    } else if (typeof value === 'object' && value !== null) {
+        if(label === "Gehalt" && 'amount' in value && 'currency' in value && 'type' in value) {
+            displayValue = `${(value as User['salary'])?.amount} ${(value as User['salary'])?.currency} (${(value as User['salary'])?.type})`;
+        } else if (label === "Adresse" && 'street' in value && 'postalCode' in value && 'city' in value) {
+            displayValue = `${(value as User['address'])?.street}, ${(value as User['address'])?.postalCode} ${(value as User['address'])?.city}`;
+        } else if (label === "Bestellhistorie" && Array.isArray(value)) {
+             displayValue = (
+                <ul className="list-disc pl-5 mt-1 space-y-1">
+                {(value as NonNullable<User['orderHistory']>).map(order => (
+                    <li key={order.orderId}>
+                    Bestellung {order.orderId} am {formatDate(order.date)} - Gesamt: €{order.total.toFixed(2)}
+                    </li>
+                ))}
+                </ul>
+            );
+        }
+         else {
+            displayValue = (
+                <ul className="list-disc pl-5 space-y-1">
+                {Object.entries(value).map(([key, val]) => (
+                    <li key={key}>
+                    <span className="font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}:</span> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                    </li>
+                ))}
+                </ul>
+            );
+        }
     } else {
       displayValue = String(value);
     }
     return (
       <div>
         <Label className="font-semibold">{label}</Label>
-        {typeof value === 'object' && !Array.isArray(value) ? <div className="mt-1">{displayValue}</div> : <p>{displayValue}</p>}
+        {typeof value === 'object' && !Array.isArray(value) && label !== "Gehalt" && label !== "Adresse" ? <div className="mt-1">{displayValue}</div> : <p className="text-sm">{displayValue}</p>}
       </div>
     );
   };
@@ -254,55 +412,41 @@ export default function UsersPage() {
       <Dialog open={isViewDetailModalOpen} onOpenChange={setIsViewDetailModalOpen}>
         <DialogContent className="sm:max-w-lg">
           <ScrollArea className="max-h-[80vh]">
-            <div className="p-1">
+            <div className="p-1"> {/* Added padding for ScrollArea content */}
               <DialogHeader>
                 <DialogTitle>User Details: {selectedUserForView?.fullName}</DialogTitle>
               </DialogHeader>
               {selectedUserForView && (
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-3 py-4 text-sm">
                   {renderDetailItem("ID", selectedUserForView.id)}
-                  {renderDetailItem("Full Name", selectedUserForView.fullName)}
+                  {renderDetailItem("Vollständiger Name", selectedUserForView.fullName)}
                   {renderDetailItem("Email", selectedUserForView.email)}
-                  {renderDetailItem("Role", selectedUserForView.role)}
+                  {renderDetailItem("Rolle", selectedUserForView.role)}
                   {renderDetailItem("Status", selectedUserForView.status)}
-                  {renderDetailItem("Created At", formatDate(selectedUserForView.createdAt))}
+                  {renderDetailItem("Erstellt am", formatDate(selectedUserForView.createdAt))}
 
-                  {selectedUserForView.role === 'admin' && renderDetailItem("Permissions", selectedUserForView.permissions)}
+                  {selectedUserForView.role === 'admin' && renderDetailItem("Berechtigungen", selectedUserForView.permissions)}
 
                   {selectedUserForView.role === 'employee' && (
                     <>
                       {renderDetailItem("Position", selectedUserForView.position)}
-                      {renderDetailItem("Contract Type", selectedUserForView.contractType)}
-                      {renderDetailItem("Salary", selectedUserForView.salary ? `${selectedUserForView.salary.amount} ${selectedUserForView.salary.currency} (${selectedUserForView.salary.type})` : undefined)}
-                      {renderDetailItem("Working Hours", selectedUserForView.workingHours)}
-                      {renderDetailItem("Vehicle Type", selectedUserForView.vehicleType)}
-                      {renderDetailItem("Speciality", selectedUserForView.speciality)}
-                      {renderDetailItem("Language Skills", selectedUserForView.languageSkills)}
-                      {renderDetailItem("Notes", selectedUserForView.notes)}
+                      {renderDetailItem("Vertragstyp", selectedUserForView.contractType)}
+                      {renderDetailItem("Gehalt", selectedUserForView.salary)}
+                      {renderDetailItem("Arbeitszeiten", selectedUserForView.workingHours)}
+                      {renderDetailItem("Fahrzeugtyp", selectedUserForView.vehicleType)}
+                      {renderDetailItem("Spezialgebiet", selectedUserForView.speciality)}
+                      {renderDetailItem("Sprachkenntnisse", selectedUserForView.languageSkills)}
+                      {renderDetailItem("Notizen", selectedUserForView.notes)}
                     </>
                   )}
 
                   {selectedUserForView.role === 'customer' && (
                     <>
-                      {renderDetailItem("Phone", selectedUserForView.phone)}
-                      {selectedUserForView.address && (
-                        <div>
-                          <Label className="font-semibold">Address</Label>
-                          <p>{selectedUserForView.address.street}, {selectedUserForView.address.postalCode} {selectedUserForView.address.city}</p>
-                        </div>
-                      )}
-                      {selectedUserForView.orderHistory && selectedUserForView.orderHistory.length > 0 && (
-                        <div>
-                          <Label className="font-semibold">Order History</Label>
-                          <ul className="list-disc pl-5 mt-1 space-y-1">
-                            {selectedUserForView.orderHistory.map(order => (
-                              <li key={order.orderId}>
-                                Order {order.orderId} on {formatDate(order.date)} - Total: €{order.total.toFixed(2)}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {renderDetailItem("Telefon", selectedUserForView.phone)}
+                      {renderDetailItem("Adresse", selectedUserForView.address)}
+                      {selectedUserForView.orderHistory && selectedUserForView.orderHistory.length > 0 && 
+                        renderDetailItem("Bestellhistorie", selectedUserForView.orderHistory)
+                      }
                     </>
                   )}
                 </div>
@@ -320,58 +464,148 @@ export default function UsersPage() {
 
       {/* Edit/Add User Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{currentUser?.id ? "Edit User" : "Add New User"}</DialogTitle>
-            <DialogDescription>
-              {currentUser?.id ? "Update the user's details." : "Enter the details for the new user."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="fullName" className="text-right">Full Name</Label>
-              <Input id="fullName" name="fullName" value={currentUser?.fullName || ""} onChange={handleInputChange} className="col-span-3" />
+        <DialogContent className="sm:max-w-lg">
+         <ScrollArea className="max-h-[80vh]">
+           <div className="p-1"> {/* Added padding for ScrollArea content */}
+            <DialogHeader>
+                <DialogTitle>{currentUser?.id ? "Benutzer bearbeiten" : "Neuen Benutzer hinzufügen"}</DialogTitle>
+                <DialogDescription>
+                {currentUser?.id ? "Aktualisieren Sie die Benutzerdaten." : "Geben Sie die Daten für den neuen Benutzer ein."}
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                {/* General Fields */}
+                <div className="space-y-2">
+                    <Label htmlFor="fullName">Vollständiger Name</Label>
+                    <Input id="fullName" name="fullName" value={currentUser?.fullName || ""} onChange={handleGenericInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" name="email" type="email" value={currentUser?.email || ""} onChange={handleGenericInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="role">Rolle</Label>
+                    <Select name="role" value={currentUser?.role || "customer"} onValueChange={handleRoleChange}>
+                        <SelectTrigger id="role"><SelectValue placeholder="Rolle auswählen" /></SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="employee">Mitarbeiter</SelectItem>
+                        <SelectItem value="customer">Kunde</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select name="status" value={currentUser?.status || "active"} onValueChange={handleStatusChange}>
+                        <SelectTrigger id="status"><SelectValue placeholder="Status auswählen" /></SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="active">Aktiv</SelectItem>
+                        <SelectItem value="inactive">Inaktiv</SelectItem>
+                        <SelectItem value="suspended">Gesperrt</SelectItem>
+                        <SelectItem value="pending_verification">Verifizierung ausstehend</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Admin Specific Fields */}
+                {currentUser?.role === 'admin' && (
+                    <div className="space-y-2">
+                        <Label htmlFor="permissions">Berechtigungen (kommasepariert)</Label>
+                        <Textarea id="permissions" name="permissions" value={permissionsInput} onChange={(e) => setPermissionsInput(e.target.value)} placeholder="z.B. manage_users, edit_menu" />
+                    </div>
+                )}
+
+                {/* Employee Specific Fields */}
+                {currentUser?.role === 'employee' && (
+                    <>
+                    <div className="space-y-2">
+                        <Label htmlFor="position">Position</Label>
+                        <Input id="position" name="position" value={currentUser.position || ""} onChange={handleGenericInputChange} placeholder="z.B. Fahrer, Bäcker"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="contractType">Vertragstyp</Label>
+                         <Input id="contractType" name="contractType" value={currentUser.contractType || ""} onChange={handleGenericInputChange} placeholder="z.B. Vollzeit, Teilzeit"/>
+                    </div>
+                    <fieldset className="border p-4 rounded-md space-y-2">
+                        <legend className="text-sm font-medium px-1">Gehalt</legend>
+                        <div className="space-y-2">
+                            <Label htmlFor="salary.type">Typ</Label>
+                            <Select name="salary.type" value={currentUser.salary?.type || "hourly"} onValueChange={(value) => handleSalaryChange({ target: { name: "salary.type", value } } as any)}>
+                                <SelectTrigger id="salary.type"><SelectValue placeholder="Gehaltstyp" /></SelectTrigger>
+                                <SelectContent>
+                                <SelectItem value="hourly">Stündlich</SelectItem>
+                                <SelectItem value="monthly">Monatlich</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="salary.amount">Betrag</Label>
+                            <Input id="salary.amount" name="salary.amount" type="number" step="0.01" value={currentUser.salary?.amount || 0} onChange={handleSalaryChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="salary.currency">Währung</Label>
+                            <Input id="salary.currency" name="salary.currency" value={currentUser.salary?.currency || "EUR"} onChange={handleSalaryChange} />
+                        </div>
+                    </fieldset>
+                     <div className="space-y-2">
+                        <Label htmlFor="workingHours">Arbeitszeiten (JSON Format)</Label>
+                        <Textarea id="workingHours" name="workingHours" value={workingHoursInput} onChange={(e) => setWorkingHoursInput(e.target.value)} placeholder='z.B. {"monday": "10:00-18:00"}' className="font-mono text-xs"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="vehicleType">Fahrzeugtyp</Label>
+                        <Input id="vehicleType" name="vehicleType" value={currentUser.vehicleType || ""} onChange={handleGenericInputChange} placeholder="z.B. Auto, Roller"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="speciality">Spezialgebiet (kommasepariert)</Label>
+                        <Textarea id="speciality" name="speciality" value={specialityInput} onChange={(e) => setSpecialityInput(e.target.value)} placeholder="z.B. Pizza, Pasta"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="languageSkills">Sprachkenntnisse (kommasepariert)</Label>
+                        <Textarea id="languageSkills" name="languageSkills" value={languageSkillsInput} onChange={(e) => setLanguageSkillsInput(e.target.value)} placeholder="z.B. Deutsch, Englisch"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="notes">Notizen</Label>
+                        <Textarea id="notes" name="notes" value={currentUser.notes || ""} onChange={handleGenericInputChange} />
+                    </div>
+                    </>
+                )}
+
+                {/* Customer Specific Fields */}
+                {currentUser?.role === 'customer' && (
+                    <>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Telefon</Label>
+                        <Input id="phone" name="phone" value={currentUser.phone || ""} onChange={handleGenericInputChange} />
+                    </div>
+                    <fieldset className="border p-4 rounded-md space-y-2">
+                        <legend className="text-sm font-medium px-1">Adresse</legend>
+                        <div className="space-y-2">
+                            <Label htmlFor="address.street">Straße</Label>
+                            <Input id="address.street" name="address.street" value={currentUser.address?.street || ""} onChange={handleAddressChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="address.postalCode">PLZ</Label>
+                            <Input id="address.postalCode" name="address.postalCode" value={currentUser.address?.postalCode || ""} onChange={handleAddressChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="address.city">Stadt</Label>
+                            <Input id="address.city" name="address.city" value={currentUser.address?.city || ""} onChange={handleAddressChange} />
+                        </div>
+                    </fieldset>
+                    </>
+                )}
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">Email</Label>
-              <Input id="email" name="email" type="email" value={currentUser?.email || ""} onChange={handleInputChange} className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right">Role</Label>
-              <Select name="role" value={currentUser?.role || "customer"} onValueChange={handleRoleChange}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="employee">Employee</SelectItem>
-                  <SelectItem value="customer">Customer</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">Status</Label>
-              <Select name="status" value={currentUser?.status || "active"} onValueChange={handleStatusChange}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                  <SelectItem value="pending_verification">Pending Verification</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleSaveUser}>Save User</Button>
-          </DialogFooter>
+            <DialogFooter className="sm:justify-end sticky bottom-0 bg-background py-4 px-6 border-t -mx-1 -mb-1">
+                <DialogClose asChild>
+                <Button variant="outline">Abbrechen</Button>
+                </DialogClose>
+                <Button onClick={handleSaveUser}>Benutzer speichern</Button>
+            </DialogFooter>
+           </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>
   );
 }
+
