@@ -5,14 +5,15 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen bg-background">
       <AdminSidebar />
-      <main className="ml-64 flex-1 p-6 lg:p-8 overflow-y-auto flex flex-col h-screen">
-        <div className="flex-grow">
+      {/* This div is the main content column, offset from the sidebar. It handles height and scrolling. */}
+      <div className="ml-64 h-screen overflow-y-auto flex flex-col">
+        <main className="flex-grow p-6 lg:p-8">
           {children}
-        </div>
-        <footer className="text-center text-xs text-muted-foreground py-4 mt-auto">
+        </main>
+        <footer className="text-center text-xs text-muted-foreground py-4">
           developed bei <a href="https://www.alaskaritech.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AlaskariTech</a> alle recht vorhanden
         </footer>
-      </main>
+      </div>
     </div>
   );
 }
