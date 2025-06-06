@@ -338,87 +338,89 @@ export default function ProductsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">Nr.</TableHead>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentItems.map((product, index) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{indexOfFirstItem + index + 1}</TableCell>
-                  <TableCell>
-                    <Image
-                      src={product.imageUrl || "https://placehold.co/64x64.png"}
-                      alt={product.name}
-                      width={64}
-                      height={64}
-                      className="rounded-md object-cover"
-                      data-ai-hint={
-                        product.category === 'Pizza' ? "pizza food" : 
-                        product.category === 'spacial pizza' ? "special pizza" :
-                        product.category === 'pizza brötchen' ? "pizza bread" :
-                        product.category === 'Burger' ? "burger food" : 
-                        product.category === 'finger food' ? "finger food appetizer" :
-                        product.category === 'Calzone' ? "calzone food" :
-                        product.category === 'Rollo' ? "rollo wrap" :
-                        product.category === 'Baguette' ? "baguette sandwich" :
-                        product.category === 'Snacks' ? "snacks item" :
-                        product.category === 'Salat' ? "salad food" :
-                        product.category === 'Getränke' ? "drink beverage" : 
-                        product.category === 'Eis' ? "ice cream" :
-                        product.category === 'Menu' ? "meal combo" :
-                        "food item"
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{getDisplayPrice(product.price, product.category)}</TableCell>
-                  <TableCell>
-                    {product.category && <Badge variant="outline">{product.category}</Badge>}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => openViewDetailModal(product)}>
-                          <Eye className="mr-2 h-4 w-4" /> Anzeigen
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEditModal(product)}>
-                          <Edit className="mr-2 h-4 w-4" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => handleDeleteProduct(product.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">Nr.</TableHead>
+                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {filteredProducts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <PackageSearch className="w-16 h-16 mb-4" />
-              <p className="text-lg">No products found.</p>
-              <p>Try adjusting your search or filter criteria.</p>
-            </div>
-          )}
+              </TableHeader>
+              <TableBody>
+                {currentItems.map((product, index) => (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">{indexOfFirstItem + index + 1}</TableCell>
+                    <TableCell>
+                      <Image
+                        src={product.imageUrl || "https://placehold.co/64x64.png"}
+                        alt={product.name}
+                        width={64}
+                        height={64}
+                        className="rounded-md object-cover"
+                        data-ai-hint={
+                          product.category === 'Pizza' ? "pizza food" : 
+                          product.category === 'spacial pizza' ? "special pizza" :
+                          product.category === 'pizza brötchen' ? "pizza bread" :
+                          product.category === 'Burger' ? "burger food" : 
+                          product.category === 'finger food' ? "finger food appetizer" :
+                          product.category === 'Calzone' ? "calzone food" :
+                          product.category === 'Rollo' ? "rollo wrap" :
+                          product.category === 'Baguette' ? "baguette sandwich" :
+                          product.category === 'Snacks' ? "snacks item" :
+                          product.category === 'Salat' ? "salad food" :
+                          product.category === 'Getränke' ? "drink beverage" : 
+                          product.category === 'Eis' ? "ice cream" :
+                          product.category === 'Menu' ? "meal combo" :
+                          "food item"
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{getDisplayPrice(product.price, product.category)}</TableCell>
+                    <TableCell>
+                      {product.category && <Badge variant="outline">{product.category}</Badge>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => openViewDetailModal(product)}>
+                            <Eye className="mr-2 h-4 w-4" /> Anzeigen
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEditModal(product)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => handleDeleteProduct(product.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {filteredProducts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <PackageSearch className="w-16 h-16 mb-4" />
+                <p className="text-lg">No products found.</p>
+                <p>Try adjusting your search or filter criteria.</p>
+              </div>
+            )}
+          </div>
           {totalPages > 0 && (
-            <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex items-center justify-end space-x-2 py-4 border-t mt-4">
               <Button
                 variant="outline"
                 size="sm"
