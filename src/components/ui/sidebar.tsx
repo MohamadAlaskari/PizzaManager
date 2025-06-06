@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -7,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, type ButtonProps } from "@/components/ui/button" // Import ButtonProps
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -260,30 +261,52 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
-  React.ElementRef<typeof Button>,
-  React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  HTMLButtonElement,
+  ButtonProps // Use ButtonProps directly
+>(({ className, onClick, children, asChild = false, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
 
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event);
+    toggleSidebar();
+  };
+
+  if (asChild) {
+    return (
+      <Slot
+        ref={ref}
+        onClick={handleClick}
+        className={className} // Pass className to Slot
+        {...props} // Pass other props (variant, size etc.) to Slot
+      >
+        {children}
+      </Slot>
+    );
+  }
+
+  // If not asChild, render its own Button with default content
+  // Props like variant, size will be taken from ...props or default to Button's defaults
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("h-7 w-7", className)}
-      onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
-      }}
-      {...props}
+      variant={props.variant || "ghost"} // Default variant if not specified
+      size={props.size || "icon"}       // Default size if not specified
+      className={cn("h-7 w-7", className)} // Default styling + passed className
+      onClick={handleClick}
+      // Ensure asChild is not passed down to this specific Button instance
+      // by excluding it from ...props or setting it to false.
+      // ButtonProps already defaults asChild to false, so spreading props is okay
+      // as long as we handle the asChild path above.
+      {...props} // Pass other props
     >
       <PanelLeft />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
-  )
-})
-SidebarTrigger.displayName = "SidebarTrigger"
+  );
+});
+SidebarTrigger.displayName = "SidebarTrigger";
+
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
