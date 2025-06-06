@@ -240,7 +240,14 @@ export default function ProductsPage() {
                       width={64}
                       height={64}
                       className="rounded-md object-cover"
-                      data-ai-hint={product.category === 'Pizza' ? "pizza food" : product.category === 'Burger' ? "burger food" : product.category === 'Salad' ? "salad food" : "food item"}
+                      data-ai-hint={
+                        product.category === 'Pizza' ? "pizza food" : 
+                        product.category === 'Burger' ? "burger food" : 
+                        product.category === 'Salad' ? "salad food" :
+                        product.category === 'Calzone' ? "calzone food" :
+                        product.category === 'Getränke' ? "drink beverage" : 
+                        "food item"
+                      }
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>

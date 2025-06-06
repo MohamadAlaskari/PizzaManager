@@ -296,7 +296,7 @@ const newBurgers: Product[] = [
     name: 'Veggie Burger',
     description: 'Champignons',
     price: { "1 Patty": 5.50, "2 Patty": 7.50 },
-    ingredients: ["Champignons"], // Assuming a mushroom patty or mushrooms as main component
+    ingredients: ["Gemüse Patty", "Champignons", "Eisbergsalat", "Tomaten", "Sauce"],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
   },
@@ -308,6 +308,72 @@ const newBurgers: Product[] = [
     ingredients: ["100g Patty", "Eisbergsalat", "Tomaten", "Gurke", "Zwiebeln", "Jalapenos", "Soße", "Käse"],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Burger',
+  },
+];
+
+const newCalzones: Product[] = [
+  {
+    id: 'cz1',
+    name: 'Hawai Calzone',
+    description: 'Putenschinken, Ananas, Goudakäse',
+    price: 10.00,
+    ingredients: ['Putenschinken', 'Ananas', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz2',
+    name: 'Tonno Calzone',
+    description: 'Thunfisch, Zwiebeln, Goudakäse',
+    price: 10.50,
+    ingredients: ['Thunfisch', 'Zwiebeln', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz3',
+    name: 'Belami Calzone',
+    description: 'Knoblauchwurst, Peperoni, Oliven',
+    price: 11.00,
+    ingredients: ['Knoblauchwurst', 'Peperoni', 'Oliven'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz4',
+    name: 'Vegetarisch Calzone',
+    description: 'Weißkäse, Oliven, Peperoni, Goudakäse',
+    price: 10.50,
+    ingredients: ['Weißkäse', 'Oliven', 'Peperoni', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz5',
+    name: 'Kebab Calzone',
+    description: 'Kebabfleisch, Zwiebeln, Goudakäse',
+    price: 11.00,
+    ingredients: ['Kebabfleisch', 'Zwiebeln', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz6',
+    name: 'Hähnchen Calzone',
+    description: 'Hähnchenbrust, Zwiebeln, Goudakäse',
+    price: 11.00,
+    ingredients: ['Hähnchenbrust', 'Zwiebeln', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
+  },
+  {
+    id: 'cz7',
+    name: 'Mix Calzone',
+    description: 'Kebabfleisch, Hähnchenbrust, Goudakäse',
+    price: 11.50,
+    ingredients: ['Kebabfleisch', 'Hähnchenbrust', 'Goudakäse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Calzone',
   },
 ];
 
@@ -344,7 +410,7 @@ const otherProducts: Product[] = [
   },
 ];
 
-export const placeholderProducts: Product[] = [...newPizzas, ...newBurgers, ...otherProducts];
+export const placeholderProducts: Product[] = [...newPizzas, ...newBurgers, ...newCalzones, ...otherProducts];
 
 export const placeholderOrders: Order[] = [
   {
