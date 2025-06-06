@@ -165,7 +165,7 @@ export default function ProductsPage() {
       return `€${price.toFixed(2)}`;
     }
     if (category === 'Pizza' && typeof price === 'object' && price !== null) {
-      const priceValues = Object.values(price).filter(p => typeof p === 'number') as number[];
+      const priceValues = Object.values(price).filter(p => typeof p === 'number' && p > 0) as number[];
       if (priceValues.length > 0) {
         return `Ab €${Math.min(...priceValues).toFixed(2)}`;
       }
@@ -203,6 +203,7 @@ export default function ProductsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">Nr.</TableHead>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Price</TableHead>
@@ -211,8 +212,9 @@ export default function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product, index) => (
                 <TableRow key={product.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell>
                     <Image
                       src={product.imageUrl || "https://placehold.co/64x64.png"}
