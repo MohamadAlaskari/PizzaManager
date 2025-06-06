@@ -273,6 +273,15 @@ const specialPizzas: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'spacial pizza',
   },
+  {
+    id: 'sp2',
+    name: 'Chef Spezial',
+    description: 'Eine geheime Kreation des Küchenchefs mit saisonalen Zutaten.',
+    price: { "24cm": 13.00, "30cm": 16.50, "40cm": 21.00 },
+    ingredients: ['Pizzateig', 'Tomatensauce', 'Überraschungszutaten'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'spacial pizza',
+  }
 ];
 
 const pizzaBroetchen: Product[] = [
@@ -285,6 +294,15 @@ const pizzaBroetchen: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'pizza brötchen',
   },
+  {
+    id: 'pb2',
+    name: 'Pizzabrötchen Käse',
+    description: '6 Stück mit Käse überbacken.',
+    price: 5.50,
+    ingredients: ['Pizzateig', 'Käse'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'pizza brötchen',
+  }
 ];
 
 
@@ -346,6 +364,15 @@ const fingerFoods: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'finger food',
   },
+  {
+    id: 'ff2',
+    name: 'Mozzarella Sticks',
+    description: '6 Stück panierte Mozzarella Sticks mit Marinara-Dip.',
+    price: 5.80,
+    ingredients: ['Mozzarella', 'Panade', 'Marinara-Dip'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'finger food',
+  }
 ];
 
 const newCalzones: Product[] = [
@@ -424,19 +451,128 @@ const rollos: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Rollo',
   },
+  {
+    id: 'rl2',
+    name: 'Chicken Rollo',
+    description: 'Gefüllt mit Hähnchenfleisch, Salat und Currysauce.',
+    price: 7.50,
+    ingredients: ['Fladenbrot', 'Hähnchenfleisch', 'Salatmix', 'Currysauce'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Rollo',
+  }
 ];
 
 const baguettes: Product[] = [
   {
     id: 'bg1',
-    name: 'Salami Baguette',
-    description: 'Frisches Baguette mit Salami, Käse und Salat.',
-    price: 6.00,
-    ingredients: ['Baguettebrot', 'Salami', 'Käse', 'Salat'],
+    name: 'Baguette Huhn',
+    description: 'Eisbergsalat, Käse, Hähnchenfleisch, Zwiebeln, Soße',
+    price: 10.30,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Hähnchenfleisch', 'Zwiebeln', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg2',
+    name: 'Baguette Peperoni',
+    description: 'Eisbergsalat, Käse, Salami, Zwiebeln, Hirtenkäse, Soße',
+    price: 10.30,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Salami', 'Zwiebeln', 'Hirtenkäse', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg3',
+    name: 'Baguette Schinken',
+    description: 'Eisbergsalat, Käse, Schinken, Tomaten, Gurken, Soße',
+    price: 9.50,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Schinken', 'Tomaten', 'Gurken', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg4',
+    name: 'Baguette Belami',
+    description: 'Eisbergsalat, Käse, Peperoni, Knoblauchwurst, Soße',
+    price: 9.50,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Peperoni', 'Knoblauchwurst', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg5',
+    name: 'Baguette Hawaii',
+    description: 'Eisbergsalat, Käse, Putenschinken, Ananas, Soße',
+    price: 9.50,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Putenschinken', 'Ananas', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg6',
+    name: 'Baguette Tonno',
+    description: 'Eisbergsalat, Käse, Thunfisch, Tomaten, Zwiebeln, Soße',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Thunfisch', 'Tomaten', 'Zwiebeln', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg7',
+    name: 'Baguette Vegetarisch',
+    description: 'Eisbergsalat, Käse, Champignons, Paprika, Mais, Zwiebeln, Soße',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Champignons', 'Paprika', 'Mais', 'Zwiebeln', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg8',
+    name: 'Baguette Salami',
+    description: 'Eisbergsalat, Käse, Rindersalami, Champignons, Tomatensoße',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Rindersalami', 'Champignons', 'Tomatensoße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg9',
+    name: 'Baguette Greta',
+    description: 'Eisbergsalat, Käse, Hähnchenbrust, Tomaten, Zwiebeln',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Hähnchenbrust', 'Tomaten', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg10',
+    name: 'Baguette Pute',
+    description: 'Eisbergsalat, Käse, Putenbrust, Peperoni, Tomaten, Zwiebeln',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Putenbrust', 'Peperoni', 'Tomaten', 'Zwiebeln'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg11',
+    name: 'Baguette Mista',
+    description: 'Eisbergsalat, Käse, Putenschinken, Champignons, Tomaten, Soße',
+    price: 9.00,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Putenschinken', 'Champignons', 'Tomaten', 'Soße'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Baguette',
+  },
+  {
+    id: 'bg12',
+    name: 'Baguette Kebab',
+    description: 'Eisbergsalat, Käse, Kebabfleisch, Zwiebeln, Peperoni, Tomaten, Soße',
+    price: 10.30,
+    ingredients: ['Baguettebrot', 'Eisbergsalat', 'Käse', 'Kebabfleisch', 'Zwiebeln', 'Peperoni', 'Tomaten', 'Soße'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Baguette',
   },
 ];
+
 
 const snacks: Product[] = [
   {
@@ -445,6 +581,15 @@ const snacks: Product[] = [
     description: 'Klassische Pommes mit Ketchup oder Mayo.',
     price: 3.50,
     ingredients: ['Kartoffeln', 'Pflanzenöl', 'Salz'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Snacks',
+  },
+  {
+    id: 'sn2',
+    name: 'Currywurst',
+    description: 'Bratwurst mit Currysauce und Pommes.',
+    price: 6.00,
+    ingredients: ['Bratwurst', 'Currysauce', 'Currypulver', 'Pommes'],
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Snacks',
   },
@@ -502,6 +647,15 @@ const eis: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Eis',
   },
+  {
+    id: 'e2',
+    name: 'Vanilleeis',
+    description: 'Kugel Vanilleeis.',
+    price: 1.80,
+    ingredients: ['Milch', 'Zucker', 'Vanille'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Eis',
+  },
 ];
 
 const menues: Product[] = [
@@ -514,20 +668,29 @@ const menues: Product[] = [
     imageUrl: 'https://placehold.co/300x200.png',
     category: 'Menu',
   },
+  {
+    id: 'm2',
+    name: 'Burger Menü',
+    description: 'Ein Burger nach Wahl + Pommes + 1 Getränk.',
+    price: 10.50,
+    ingredients: ['Burger nach Wahl', 'Pommes', 'Getränk nach Wahl'],
+    imageUrl: 'https://placehold.co/300x200.png',
+    category: 'Menu',
+  },
 ];
 
 
 export const placeholderProducts: Product[] = [
-    ...newPizzas, 
+    ...newPizzas,
     ...specialPizzas,
     ...pizzaBroetchen,
-    ...newBurgers, 
+    ...newBurgers,
     ...fingerFoods,
-    ...newCalzones, 
+    ...newCalzones,
     ...rollos,
     ...baguettes,
     ...snacks,
-    ...salate, 
+    ...salate,
     ...getraenke,
     ...eis,
     ...menues
@@ -537,7 +700,7 @@ export const placeholderOrders: Order[] = [
   {
     id: 'o1',
     customerName: 'Charlie Customer',
-    items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }], 
+    items: [{ productId: 'p1', productName: 'Margarita 30cm', quantity: 1, price: 9.00 }],
     totalAmount: 9.00,
     status: 'Delivered',
     orderDate: '2023-05-01',
@@ -547,7 +710,7 @@ export const placeholderOrders: Order[] = [
     id: 'o2',
     customerName: 'Anonymous Guest',
     items: [
-      { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 }, 
+      { productId: 'p14', productName: 'Salami 30cm', quantity: 1, price: 12.50 },
       { productId: 'd1', productName: 'Cola', quantity: 2, price: 2.49 }
     ],
     totalAmount: 12.50 + (2 * 2.49),
@@ -585,10 +748,10 @@ export const placeholderUserTrendData: UserTrendData[] = [
 ];
 
 export const placeholderProductPerformanceData: ProductPerformanceData[] = [
-  { name: 'Margarita', sales: 120 }, 
-  { name: 'Salami', sales: 95 }, 
-  { name: 'Hamburger', sales: 80 }, 
-  { name: 'Chicken', sales: 60 }, 
+  { name: 'Margarita', sales: 120 },
+  { name: 'Salami', sales: 95 },
+  { name: 'Hamburger', sales: 80 },
+  { name: 'Chicken', sales: 60 },
   { name: 'Cola', sales: 150 },
 ];
 
@@ -615,3 +778,4 @@ export const currentInventoryJsonExample = JSON.stringify({
   "Pizzateig": 100, "Tomatensauce": 20, "Mozzarella": 30, "Basilikum": 5, "Salami": 15, "Burger Buns": 30, "Rindfleisch Patties": 25
 }, null, 2);
 
+    
