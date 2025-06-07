@@ -340,7 +340,7 @@ export default function ProductsPage() {
         <CardContent>
           <div className="max-h-[60vh] overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-card">
                 <TableRow>
                   <TableHead className="w-[50px]">Nr.</TableHead>
                   <TableHead className="w-[80px]">Image</TableHead>
