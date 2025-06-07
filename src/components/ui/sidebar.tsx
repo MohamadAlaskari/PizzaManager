@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, ChevronRight, ChevronLeft } from "lucide-react" // Added ChevronRight, ChevronLeft
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -35,6 +35,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  side: "left" | "right" // Added side to context
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -54,6 +55,7 @@ const SidebarProvider = React.forwardRef<
     defaultOpen?: boolean
     open?: boolean
     onOpenChange?: (open: boolean) => void
+    defaultSide?: "left" | "right" // Added defaultSide
   }
 >(
   (
@@ -61,6 +63,7 @@ const SidebarProvider = React.forwardRef<
       defaultOpen = true,
       open: openProp,
       onOpenChange: setOpenProp,
+      defaultSide = "left", // Default side
       className,
       style,
       children,
@@ -136,8 +139,9 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        side: defaultSide, // Provide side in context
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, defaultSide]
     )
 
     return (
@@ -177,7 +181,7 @@ const Sidebar = React.forwardRef<
 >(
   (
     {
-      side = "left",
+      side: sideProp, // Renamed to avoid conflict with context's side
       variant = "sidebar",
       collapsible = "offcanvas",
       className,
@@ -186,19 +190,8 @@ const Sidebar = React.forwardRef<
     },
     ref 
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
-
-    const handleMouseEnter = React.useCallback(() => {
-      if (!isMobile && collapsible === 'icon' && state === 'collapsed') {
-        setOpen(true);
-      }
-    }, [isMobile, collapsible, setOpen, state]);
-
-    const handleMouseLeave = React.useCallback(() => {
-      if (!isMobile && collapsible === 'icon' && state === 'expanded') {
-         setOpen(false);
-      }
-    }, [isMobile, collapsible, setOpen, state]);
+    const { isMobile, state, openMobile, setOpenMobile, side: contextSide } = useSidebar()
+    const side = sideProp ?? contextSide; // Use prop or context side
 
     if (collapsible === "none") {
       return (
@@ -265,8 +258,7 @@ const Sidebar = React.forwardRef<
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l"
           )}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          // Removed onMouseEnter and onMouseLeave for hover-to-expand
         >
           <div
             data-sidebar="sidebar"
@@ -282,7 +274,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant: buttonVariant, size: buttonSize, asChild = false, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
 
     const internalHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -295,29 +287,29 @@ const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
       toggleSidebar();
     };
 
-    const Comp = asChild ? Slot : Button;
+    const Comp = asChild ? Slot : "button";
 
     if (asChild) {
       return (
         <Slot
           ref={ref}
           onClick={internalHandleClick}
-          className={className} 
-          {...props} 
+          className={className}
+          {...props}
         />
       );
     }
-
+    
     return (
       <Button
         ref={ref}
-        variant={variant || "ghost"}
-        size={size || "icon"}
-        className={cn("h-7 w-7", className)} 
+        variant={buttonVariant || "ghost"}
+        size={buttonSize || "icon"}
+        className={cn("h-7 w-7", className)}
         onClick={internalHandleClick}
-        {...props} 
+        {...props}
       >
-        {props.children ? props.children : ( 
+        {props.children ? props.children : (
           <>
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
@@ -334,33 +326,32 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, side } = useSidebar()
 
   return (
     <button
       ref={ref}
       data-sidebar="rail"
       aria-label="Toggle Sidebar"
-      tabIndex={-1}
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden cursor-pointer transition-all ease-linear",
-        "w-4 hover:bg-sidebar-accent/20", 
-        "-translate-x-1/2",
-        "after:absolute after:inset-y-0 after:left-1/2 after:transition-colors",
-        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", 
+        "absolute z-20 hidden transition-all ease-linear",
+        "h-10 w-10 rounded-full flex items-center justify-center shadow-lg", // Button shape and shadow
+        "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border", // Button colors
+        "top-4", // Positioned at the top
         "md:flex", 
-        "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
+        "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden", // Visibility logic
         "peer-data-[collapsible=offcanvas]:hidden",
-        "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
-        "peer-data-[side=right]:right-[var(--sidebar-width-icon)] peer-data-[side=right]:translate-x-1/2",
-        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize",
-        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize",
+        // Positioning to be centered on the outer edge of collapsed sidebar
+        side === "left" ? "left-[var(--sidebar-width-icon)] -translate-x-1/2" : "right-[var(--sidebar-width-icon)] translate-x-1/2",
+        "cursor-pointer", // Ensure cursor is pointer
         className
       )}
       {...props}
-    />
+    >
+      {side === "left" ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+    </button>
   )
 })
 SidebarRail.displayName = "SidebarRail"
