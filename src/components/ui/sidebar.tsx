@@ -189,7 +189,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile, side: contextSide } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, side: contextSide, setOpen, open } = useSidebar()
     const side = sideProp ?? contextSide;
 
     if (collapsible === "none") {
@@ -232,7 +232,7 @@ const Sidebar = React.forwardRef<
         ref={ref}
         className={cn("group peer hidden md:block text-sidebar-foreground", className)}
         data-state={state}
-        data-configured-collapsible={collapsible} 
+        data-configured-collapsible={collapsible}
         data-collapsible={state === "collapsed" ? collapsible : ""} 
         data-variant={variant}
         data-side={side}
@@ -274,11 +274,11 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  Omit<ButtonProps, "asChild" | "onClick"> & {
+  Omit<ButtonProps, "onClick"> & {
     asChild?: boolean;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
   }
->(({ className, variant, size, asChild = false, children: triggerChildrenProp, ...props }, ref) => {
+>(({ className, variant: buttonVariant, size: buttonSize, asChild = false, children: triggerChildren, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
 
   const internalHandleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -290,33 +290,29 @@ const SidebarTrigger = React.forwardRef<
     }
   };
 
-  if (asChild) {
-    return (
-      <Slot
-        ref={ref}
-        onClick={internalHandleClick}
-        className={className}
-        {...props} // {...props} already contains children
-      />
-    );
-  }
+  const Comp = asChild ? Slot : Button;
 
   return (
-    <Button
+    <Comp
       ref={ref}
-      variant={variant || "ghost"}
-      size={size || "icon"}
-      className={cn("h-7 w-7", className)}
+      className={cn(
+        !asChild && "h-7 w-7", // Default size if not asChild
+        className
+      )}
+      variant={!asChild ? buttonVariant || "ghost" : undefined}
+      size={!asChild ? buttonSize || "icon" : undefined}
       onClick={internalHandleClick}
-      {...props} // Spread other props, but not children explicitly if we want a default
+      {...props} // Spreads original children if asChild, and other props
     >
-      {triggerChildrenProp || ( // Render passed children, or default icon
+      {!asChild && !triggerChildren ? ( // Default icon only if not asChild AND no children provided
         <>
           <PanelLeft className="h-5 w-5" />
           <span className="sr-only">Toggle Menu</span>
         </>
+      ) : (
+        triggerChildren // Render provided children if asChild or if children are explicitly passed
       )}
-    </Button>
+    </Comp>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
@@ -348,13 +344,13 @@ const SidebarRail = React.forwardRef<
         "fixed z-20 transition-all ease-linear", 
         "h-8 w-8 rounded-full flex items-center justify-center shadow-lg cursor-pointer", 
         "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border",
-        "top-1/2 -translate-y-1/2", 
+        "top-[calc(50%+3rem)] -translate-y-1/2", 
         "hidden", 
         "md:peer-data-[configured-collapsible=icon]:flex", 
-        side === 'left' && state === 'collapsed' && 'left-[var(--sidebar-width-icon)] -translate-x-1/2',
-        side === 'left' && state === 'expanded' && 'left-[var(--sidebar-width)] -translate-x-1/2',
-        side === 'right' && state === 'collapsed' && 'right-[var(--sidebar-width-icon)] translate-x-1/2',
-        side === 'right' && state === 'expanded' && 'right-[var(--sidebar-width)] translate-x-1/2',
+        side === 'left' && state === 'collapsed' && 'left-[calc(var(--sidebar-width-icon)-1rem)]', // Adjusted for button center
+        side === 'left' && state === 'expanded' && 'left-[calc(var(--sidebar-width)-1rem)]',     // Adjusted for button center
+        side === 'right' && state === 'collapsed' && 'right-[calc(var(--sidebar-width-icon)-1rem)]',
+        side === 'right' && state === 'expanded' && 'right-[calc(var(--sidebar-width)-1rem)]',
         className
       )}
       {...props}
