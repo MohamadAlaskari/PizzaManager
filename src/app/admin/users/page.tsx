@@ -375,7 +375,7 @@ export default function UsersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-auto">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-card">
                 <TableRow>
