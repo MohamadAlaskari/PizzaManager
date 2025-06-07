@@ -1,6 +1,6 @@
 
 import type { PropsWithChildren } from 'react';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar'; // Added SidebarRail
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { AdminSidebarContent } from '@/components/layout/AdminSidebarContent';
 import { Button } from '@/components/ui/button';
 import { PanelLeft } from 'lucide-react';
@@ -8,7 +8,7 @@ import { PanelLeft } from 'lucide-react';
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex min-h-screen w-full bg-background"> {/* Added w-full here */}
+      <div className="relative flex min-h-screen w-full bg-background"> {/* Added relative */}
         <Sidebar
             collapsible="icon"
             className="hidden md:flex border-r border-sidebar-border"
@@ -16,12 +16,12 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         >
           <AdminSidebarContent />
         </Sidebar>
-        <SidebarRail /> {/* Added SidebarRail here */}
+        <SidebarRail />
 
         {/* Right Section Wrapper */}
-        <div className="flex flex-1 flex-col overflow-hidden"> {/* Ensures this container takes remaining width and handles overflow */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Mobile Trigger Header */}
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
-            {/* Mobile Trigger */}
             <SidebarTrigger asChild>
               <Button size="icon" variant="outline">
                 <PanelLeft className="h-5 w-5" />
@@ -31,7 +31,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <div className="font-semibold">PizzaManager</div>
           </header>
 
-          {/* This inner div will handle the scrolling for main content and footer */}
+          {/* Main content and footer scroll container */}
           <div className="flex flex-1 flex-col overflow-y-auto">
             <main className="flex-grow p-6 lg:p-8">
               {children}

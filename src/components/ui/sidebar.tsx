@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button" // Import ButtonProps
+import { Button, type ButtonProps } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -216,7 +216,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className={cn("group peer hidden md:block text-sidebar-foreground", className)}
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -262,7 +262,7 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  ButtonProps // Use ButtonProps directly
+  ButtonProps
 >(({ className, onClick, children, asChild = false, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
 
@@ -272,6 +272,8 @@ const SidebarTrigger = React.forwardRef<
   };
 
   if (asChild) {
+    // If asChild is true, render Slot and pass props to the child.
+    // The child component is responsible for rendering the actual button.
     return (
       <Slot
         ref={ref}
@@ -285,22 +287,17 @@ const SidebarTrigger = React.forwardRef<
   }
 
   // If not asChild, render its own Button with default content
-  // Props like variant, size will be taken from ...props or default to Button's defaults
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
-      variant={props.variant || "ghost"} // Default variant if not specified
-      size={props.size || "icon"}       // Default size if not specified
-      className={cn("h-7 w-7", className)} // Default styling + passed className
+      variant={props.variant || "ghost"}
+      size={props.size || "icon"}
+      className={cn("h-7 w-7", className)} // Default styling + passed className for the button itself
       onClick={handleClick}
-      // Ensure asChild is not passed down to this specific Button instance
-      // by excluding it from ...props or setting it to false.
-      // ButtonProps already defaults asChild to false, so spreading props is okay
-      // as long as we handle the asChild path above.
-      {...props} // Pass other props
+      {...props} // Pass other props but ensure asChild is not re-applied here
     >
-      <PanelLeft />
+      {children || <PanelLeft />} {/* Default icon if no children provided */}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
@@ -323,12 +320,21 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
-        "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
-        "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-        "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar",
-        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
-        "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
+        "absolute inset-y-0 z-20 hidden w-2.5 cursor-pointer transition-all ease-linear",
+        "-translate-x-1/2", // Centers the rail line on its position
+        "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:bg-sidebar-border after:transition-colors hover:after:w-[3px] hover:after:bg-primary",
+        "md:flex", // Show on desktop
+        // Visibility based on peer (Sidebar) state and type
+        "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
+        "peer-data-[collapsible=offcanvas]:hidden", // Hide if sidebar is full offcanvas type
+
+        // Positioning based on peer (Sidebar)
+        "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
+        "peer-data-[side=right]:right-[var(--sidebar-width-icon)] peer-data-[side=right]:translate-x-1/2", // Adjust translate for right side if needed
+
+        // Cursor adjustments based on action
+        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize", // Expand East
+        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize", // Expand West
         className
       )}
       {...props}
