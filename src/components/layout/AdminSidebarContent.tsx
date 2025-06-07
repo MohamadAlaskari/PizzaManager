@@ -27,6 +27,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   useSidebar,
+  SidebarMenuSubItem, // Added import
 } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 
@@ -47,7 +48,7 @@ const navItems = [
 
 export function AdminSidebarContent() {
   const pathname = usePathname();
-  const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({ "AI Tools": true });
+  const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({ "AI Tools": false }); // Changed true to false
   const { state: sidebarState, isMobile } = useSidebar();
 
   const toggleCollapsible = (label: string) => {
