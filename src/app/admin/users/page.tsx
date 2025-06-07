@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,6 +166,7 @@ export default function UsersPage() {
     setCurrentUser(prev => ({ 
         ...prev, 
         role: value,
+        // Reset role-specific fields when role changes, keeping existing values if applicable
         permissions: value === 'admin' ? prev?.permissions || [] : [],
         position: value === 'employee' ? prev?.position || "" : "",
         contractType: value === 'employee' ? prev?.contractType || "" : "",
@@ -219,7 +220,7 @@ export default function UsersPage() {
     }
 
     let parsedWorkingHours = currentUser.workingHours;
-    if (currentUser.role === 'employee') {
+    if (currentUser.role === 'employee' && workingHoursInput) {
         try {
             parsedWorkingHours = JSON.parse(workingHoursInput);
         } catch (error) {
@@ -244,7 +245,7 @@ export default function UsersPage() {
       notes: currentUser.role === 'employee' ? currentUser.notes : undefined,
       phone: currentUser.role === 'customer' ? currentUser.phone : undefined,
       address: currentUser.role === 'customer' ? currentUser.address : undefined,
-      orderHistory: currentUser.role === 'customer' ? currentUser.orderHistory : [], 
+      orderHistory: currentUser.role === 'customer' ? currentUser.orderHistory || [] : [], 
     };
   
     if (currentUser?.id) { 
@@ -273,12 +274,12 @@ export default function UsersPage() {
     }
   };
 
-  const getStatusBadgeVariant = (status?: User['status']): "default" | "secondary" | "outline" | "destructive" => {
+  const getStatusBadgeVariant = (status?: User['status']): BadgeProps['variant'] => {
     switch (status) {
-      case 'active': return 'default'; 
-      case 'inactive': return 'secondary'; 
-      case 'suspended': return 'destructive'; 
-      case 'pending_verification': return 'outline'; 
+      case 'active': return 'default'; // Assuming default/primary is themed green-ish
+      case 'suspended': return 'destructive'; // Red
+      case 'pending_verification': return 'outline'; // Yellowish/Neutral, depends on accent theme for outline
+      case 'inactive': return 'secondary'; // Greyish
       default: return 'default';
     }
   };
@@ -290,6 +291,8 @@ export default function UsersPage() {
     let displayValue: React.ReactNode;
     if (Array.isArray(value)) {
       displayValue = value.join(', ');
+    } else if (label === "Status" && typeof value === 'string') {
+        displayValue = <Badge variant={getStatusBadgeVariant(value as User['status'])} className="capitalize">{value.replace('_', ' ')}</Badge>;
     } else if (typeof value === 'object' && value !== null) {
         if(label === "Gehalt" && 'amount' in value && 'currency' in value && 'type' in value) {
             displayValue = `${(value as User['salary'])?.amount} ${(value as User['salary'])?.currency} (${(value as User['salary'])?.type})`;
@@ -323,7 +326,7 @@ export default function UsersPage() {
     return (
       <div>
         <Label className="font-semibold">{label}</Label>
-        {typeof value === 'object' && !Array.isArray(value) && label !== "Gehalt" && label !== "Adresse" ? <div className="mt-1">{displayValue}</div> : <p className="text-sm">{displayValue}</p>}
+        { (typeof value === 'object' && !Array.isArray(value) && label !== "Gehalt" && label !== "Adresse") || label === "Status" ? <div className="mt-1">{displayValue}</div> : <p className="text-sm">{displayValue}</p>}
       </div>
     );
   };
