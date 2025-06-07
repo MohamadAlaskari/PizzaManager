@@ -346,6 +346,7 @@ export default function ProductsPage() {
                   <TableHead className="w-[80px]">Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Zutaten</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -381,6 +382,9 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{getDisplayPrice(product.price, product.category)}</TableCell>
+                    <TableCell className="text-xs max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title={product.ingredients.join(', ')}>
+                      {product.ingredients.join(', ')}
+                    </TableCell>
                     <TableCell>
                       {product.category && <Badge variant="outline">{product.category}</Badge>}
                     </TableCell>
