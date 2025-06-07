@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft, ChevronRight, ChevronLeft } from "lucide-react" 
+import { PanelLeft, ChevronRight, ChevronLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -35,7 +35,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
-  side: "left" | "right" 
+  side: "left" | "right"
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -55,7 +55,7 @@ const SidebarProvider = React.forwardRef<
     defaultOpen?: boolean
     open?: boolean
     onOpenChange?: (open: boolean) => void
-    defaultSide?: "left" | "right" 
+    defaultSide?: "left" | "right"
   }
 >(
   (
@@ -63,7 +63,7 @@ const SidebarProvider = React.forwardRef<
       defaultOpen = true,
       open: openProp,
       onOpenChange: setOpenProp,
-      defaultSide = "left", 
+      defaultSide = "left",
       className,
       style,
       children,
@@ -88,7 +88,7 @@ const SidebarProvider = React.forwardRef<
     })
 
     const open = openProp ?? _open
-    
+
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
@@ -121,7 +121,6 @@ const SidebarProvider = React.forwardRef<
           toggleSidebar()
         }
       }
-
       if (typeof window !== 'undefined') {
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
@@ -139,7 +138,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
-        side: defaultSide, 
+        side: defaultSide,
       }),
       [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, defaultSide]
     )
@@ -181,17 +180,17 @@ const Sidebar = React.forwardRef<
 >(
   (
     {
-      side: sideProp, 
+      side: sideProp,
       variant = "sidebar",
       collapsible = "offcanvas",
       className,
       children,
-      ...props 
+      ...props
     },
-    ref 
+    ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile, side: contextSide } = useSidebar()
-    const side = sideProp ?? contextSide; 
+    const side = sideProp ?? contextSide;
 
     if (collapsible === "none") {
       return (
@@ -199,9 +198,9 @@ const Sidebar = React.forwardRef<
           {...props}
           className={cn(
             "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
-            className 
+            className
           )}
-          ref={ref} 
+          ref={ref}
         >
           {children}
         </div>
@@ -227,13 +226,14 @@ const Sidebar = React.forwardRef<
         </Sheet>
       )
     }
-    
+
     return (
       <div
-        ref={ref} 
-        className={cn("group peer hidden md:block text-sidebar-foreground", className)} 
+        ref={ref}
+        className={cn("group peer hidden md:block text-sidebar-foreground", className)}
         data-state={state}
-        data-collapsible={state === "collapsed" ? collapsible : ""}
+        data-configured-collapsible={collapsible} // Static attribute for configured collapsibility
+        data-collapsible={state === "collapsed" ? collapsible : ""} // Dynamic attribute for current visual state
         data-variant={variant}
         data-side={side}
       >
@@ -248,7 +248,7 @@ const Sidebar = React.forwardRef<
           )}
         />
         <div
-          {...props} 
+          {...props}
           className={cn(
             "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
             side === "left"
@@ -272,45 +272,45 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
-const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps & { asChild?: boolean }>(
-  ({ className, variant: buttonVariant, size: buttonSize, asChild = false, children: triggerChildren, ...props }, ref) => {
+const SidebarTrigger = React.forwardRef<HTMLButtonElement, Omit<ButtonProps, "asChild" | "onClick"> & { asChild?: boolean; onClick?: React.MouseEventHandler<HTMLButtonElement> }>(
+  ({ className, variant: buttonVariant, size: buttonSize, asChild = false, children: triggerChildrenProp, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
 
-    const internalHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Internal onClick handler that calls the user's onClick (if provided) then toggles the sidebar
+    const internalHandleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
       if (props.onClick) {
         props.onClick(event);
       }
-      if (!event.defaultPrevented) {
+      if (!event.defaultPrevented) { // Check if event.preventDefault() was called by user's onClick
         toggleSidebar();
       }
     };
 
-    const Comp = asChild ? Slot : Button;
-
     if (asChild) {
-      // When asChild is true, Slot clones its child and merges props.
-      // The child (Button in AdminLayout) is passed via props.children.
+      // Slot requires its child to be passed via the 'children' prop it receives,
+      // not rendered inside <Slot>{child}</Slot>.
+      // The 'children' in 'props' (triggerChildrenProp) is the actual child element (e.g., <Button> from AdminLayout).
       return (
         <Slot
           ref={ref}
-          onClick={internalHandleClick}
-          className={className} 
-          {...props} // props here includes the original children from AdminLayout
+          onClick={internalHandleClick} // Apply merged onClick
+          {...props} // Spread all other props, including 'children' (triggerChildrenProp) and original event handlers
+          className={className} // Ensure className from SidebarTrigger usage is also passed
         />
       );
     }
-    
-    // When asChild is false, SidebarTrigger renders its own Button.
+
+    // Default rendering as a Button if asChild is false
     return (
       <Button
         ref={ref}
         variant={buttonVariant || "ghost"}
         size={buttonSize || "icon"}
-        className={cn("h-7 w-7", className)} // Default className for the internally rendered button
-        onClick={internalHandleClick}
-        {...props} // Spread other props like aria-label etc.
+        className={cn("h-7 w-7", className)} // Apply default and passed className
+        onClick={internalHandleClick} // Apply merged onClick
+        {...props} // Spread other props
       >
-        {triggerChildren ? triggerChildren : ( // Use children if provided, otherwise default icon
+        {triggerChildrenProp || ( // Render passed children, or default icon
           <>
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
@@ -327,14 +327,17 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar, side, state } = useSidebar()
+  const { toggleSidebar, side, state, isMobile } = useSidebar()
 
   let IconComponent;
-  if (state === 'collapsed') {
-    IconComponent = side === 'left' ? ChevronRight : ChevronLeft;
-  } else { 
-    IconComponent = side === 'left' ? ChevronLeft : ChevronRight;
+  if (side === 'left') {
+    IconComponent = state === 'collapsed' ? ChevronRight : ChevronLeft;
+  } else { // side === 'right'
+    IconComponent = state === 'collapsed' ? ChevronLeft : ChevronRight;
   }
+
+  // Do not render on mobile, mobile has its own trigger
+  if (isMobile) return null;
 
   return (
     <button
@@ -345,19 +348,16 @@ const SidebarRail = React.forwardRef<
       title="Toggle Sidebar"
       className={cn(
         "absolute z-20 transition-all ease-linear",
-        "h-10 w-10 rounded-full flex items-center justify-center shadow-lg", 
-        "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border", 
-        "bottom-4", 
-        "md:flex", 
-        "peer-data-[collapsible=icon]:flex", 
-        "peer-data-[collapsible=offcanvas]:hidden",
-        {
-          'left-[var(--sidebar-width-icon)] -translate-x-1/2': side === 'left' && state === 'collapsed',
-          'right-[var(--sidebar-width-icon)] translate-x-1/2': side === 'right' && state === 'collapsed',
-          'left-[var(--sidebar-width)] -translate-x-1/2': side === 'left' && state === 'expanded',
-          'right-[var(--sidebar-width)] translate-x-1/2': side === 'right' && state === 'expanded',
-        },
-        "cursor-pointer", 
+        "h-10 w-10 rounded-full flex items-center justify-center shadow-lg",
+        "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border",
+        "bottom-4 cursor-pointer",
+        "hidden", // Start hidden by default
+        "md:peer-data-[configured-collapsible=icon]:flex", // Make it flex (visible) on md+ screens IF peer is icon-collapsible
+        // Conditional positioning based on sidebar side and state
+        side === 'left' && state === 'collapsed' && 'left-[var(--sidebar-width-icon)] -translate-x-1/2',
+        side === 'left' && state === 'expanded' && 'left-[var(--sidebar-width)] -translate-x-1/2',
+        side === 'right' && state === 'collapsed' && 'right-[var(--sidebar-width-icon)] translate-x-1/2',
+        side === 'right' && state === 'expanded' && 'right-[var(--sidebar-width)] translate-x-1/2',
         className
       )}
       {...props}
