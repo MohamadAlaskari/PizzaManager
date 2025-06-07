@@ -71,8 +71,21 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    const [_open, _setOpen] = React.useState(defaultOpen)
+    const [_open, _setOpen] = React.useState(() => {
+      if (typeof document !== 'undefined') {
+        const cookieValue = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+          ?.split("=")[1]
+        if (cookieValue) {
+          return cookieValue === "true"
+        }
+      }
+      return defaultOpen
+    })
+
     const open = openProp ?? _open
+    
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
@@ -91,8 +104,8 @@ const SidebarProvider = React.forwardRef<
 
     const toggleSidebar = React.useCallback(() => {
       return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
+        ? setOpenMobile((currentOpen) => !currentOpen)
+        : setOpen((currentOpen) => !currentOpen)
     }, [isMobile, setOpen, setOpenMobile])
 
     React.useEffect(() => {
@@ -169,21 +182,33 @@ const Sidebar = React.forwardRef<
       collapsible = "offcanvas",
       className,
       children,
-      ...props
+      ...props 
     },
-    ref
+    ref 
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
+
+    const handleMouseEnter = React.useCallback(() => {
+      if (!isMobile && collapsible === 'icon' && state === 'collapsed') {
+        setOpen(true);
+      }
+    }, [isMobile, collapsible, setOpen, state]);
+
+    const handleMouseLeave = React.useCallback(() => {
+      if (!isMobile && collapsible === 'icon' && state === 'expanded') {
+         setOpen(false);
+      }
+    }, [isMobile, collapsible, setOpen, state]);
 
     if (collapsible === "none") {
       return (
         <div
+          {...props}
           className={cn(
             "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
-            className
+            className 
           )}
-          ref={ref}
-          {...props}
+          ref={ref} 
         >
           {children}
         </div>
@@ -209,11 +234,11 @@ const Sidebar = React.forwardRef<
         </Sheet>
       )
     }
-
+    
     return (
       <div
-        ref={ref}
-        className={cn("group peer hidden md:block text-sidebar-foreground", className)}
+        ref={ref} 
+        className={cn("group peer hidden md:block text-sidebar-foreground", className)} 
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -230,6 +255,7 @@ const Sidebar = React.forwardRef<
           )}
         />
         <div
+          {...props} 
           className={cn(
             "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
             side === "left"
@@ -237,10 +263,10 @@ const Sidebar = React.forwardRef<
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
-            className
+              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l"
           )}
-          {...props}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <div
             data-sidebar="sidebar"
@@ -255,72 +281,49 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
-const SidebarTrigger = React.forwardRef<
-  HTMLButtonElement,
-  ButtonProps // Includes children, asChild, variant, size, className, onClick, etc.
->(
-  (
-    {
-      className, // className passed to <SidebarTrigger>
-      variant,   // variant passed to <SidebarTrigger>
-      size,      // size passed to <SidebarTrigger>
-      asChild = false,
-      // ...props will contain `children` and `onClick` (if provided in usage)
-      // and any other valid HTML button attributes.
-      ...props
-    },
-    ref
-  ) => {
+const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
 
-    // This function will be used as the onClick handler for Slot or Button.
-    // It calls the user-provided onClick (if any) and then toggles the sidebar.
     const internalHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       if (props.onClick) {
-        props.onClick(event); // Call user's onClick if it exists
+        props.onClick(event);
       }
       if (event.defaultPrevented) {
-        return; // Respect if user's onClick prevented default
+        return;
       }
       toggleSidebar();
     };
 
     const Comp = asChild ? Slot : Button;
 
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          onClick={internalHandleClick}
+          className={className} 
+          {...props} 
+        />
+      );
+    }
+
     return (
-      <Comp
-        // If asChild is true, Comp is Slot. Slot merges className with its child.
-        // If asChild is false, Comp is Button. We apply default styles + user's className.
-        className={asChild ? className : cn("h-7 w-7", className)}
-        // variant and size are primarily for when Comp is Button (asChild=false).
-        // If asChild is true, Slot will pass these to its child if the child accepts them.
+      <Button
+        ref={ref}
         variant={variant || "ghost"}
         size={size || "icon"}
-        ref={ref}
-        // Spread all other props. For Slot, this includes `children` (the element to clone).
-        // For Button, this includes any standard button attributes.
-        {...props}
-        // CRUCIAL: Always use our internalHandleClick to ensure toggleSidebar is called.
+        className={cn("h-7 w-7", className)} 
         onClick={internalHandleClick}
+        {...props} 
       >
-        {/* This content is rendered ONLY if asChild is false AND props.children is NOT provided.
-            If asChild is true, Slot handles props.children, and this block is effectively ignored by Slot.
-            If asChild is false and props.children IS provided (e.g. <SidebarTrigger>My Text</SidebarTrigger>),
-            the Button component (Comp) will render props.children.
-            If asChild is false and props.children is UNDEFINED, this default content is rendered.
-        */}
-        {!asChild && !props.children && (
+        {props.children ? props.children : ( 
           <>
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </>
         )}
-        {/* If `asChild` is false, and `props.children` *is* provided, `Button` (which is `Comp`)
-            will render those children. If `props.children` is not provided, the above block is used.
-            If `asChild` is true, `Slot` (which is `Comp`) will use `props.children` as its target child,
-            and this block is not directly rendered by `Slot` itself.
-        */}
-      </Comp>
+      </Button>
     );
   }
 );
@@ -343,12 +346,11 @@ const SidebarRail = React.forwardRef<
       title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden cursor-pointer transition-all ease-linear",
-        "w-4 hover:bg-sidebar-accent/20", // Increased width for better clickability
+        "w-4 hover:bg-sidebar-accent/20", 
         "-translate-x-1/2",
         "after:absolute after:inset-y-0 after:left-1/2 after:transition-colors",
-        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", // Thicker line
-        "md:flex", // Changed from sm:flex to md:flex
-        // Corrected peer selectors
+        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", 
+        "md:flex", 
         "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
         "peer-data-[collapsible=offcanvas]:hidden",
         "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
@@ -812,3 +814,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
