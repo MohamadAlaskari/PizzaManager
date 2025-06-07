@@ -232,8 +232,8 @@ const Sidebar = React.forwardRef<
         ref={ref}
         className={cn("group peer hidden md:block text-sidebar-foreground", className)}
         data-state={state}
-        data-configured-collapsible={collapsible} // Static attribute for configured collapsibility
-        data-collapsible={state === "collapsed" ? collapsible : ""} // Dynamic attribute for current visual state
+        data-configured-collapsible={collapsible} 
+        data-collapsible={state === "collapsed" ? collapsible : ""} 
         data-variant={variant}
         data-side={side}
       >
@@ -272,54 +272,53 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
-const SidebarTrigger = React.forwardRef<HTMLButtonElement, Omit<ButtonProps, "asChild" | "onClick"> & { asChild?: boolean; onClick?: React.MouseEventHandler<HTMLButtonElement> }>(
-  ({ className, variant: buttonVariant, size: buttonSize, asChild = false, children: triggerChildrenProp, ...props }, ref) => {
-    const { toggleSidebar } = useSidebar();
+const SidebarTrigger = React.forwardRef<
+  HTMLButtonElement,
+  Omit<ButtonProps, "asChild" | "onClick"> & {
+    asChild?: boolean;
+    onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  }
+>(({ className, variant, size, asChild = false, children: triggerChildrenProp, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
 
-    // Internal onClick handler that calls the user's onClick (if provided) then toggles the sidebar
-    const internalHandleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
-      if (props.onClick) {
-        props.onClick(event);
-      }
-      if (!event.defaultPrevented) { // Check if event.preventDefault() was called by user's onClick
-        toggleSidebar();
-      }
-    };
-
-    if (asChild) {
-      // Slot requires its child to be passed via the 'children' prop it receives,
-      // not rendered inside <Slot>{child}</Slot>.
-      // The 'children' in 'props' (triggerChildrenProp) is the actual child element (e.g., <Button> from AdminLayout).
-      return (
-        <Slot
-          ref={ref}
-          onClick={internalHandleClick} // Apply merged onClick
-          {...props} // Spread all other props, including 'children' (triggerChildrenProp) and original event handlers
-          className={className} // Ensure className from SidebarTrigger usage is also passed
-        />
-      );
+  const internalHandleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+    if (props.onClick) {
+      props.onClick(event);
     }
+    if (!event.defaultPrevented) {
+      toggleSidebar();
+    }
+  };
 
-    // Default rendering as a Button if asChild is false
+  if (asChild) {
     return (
-      <Button
+      <Slot
         ref={ref}
-        variant={buttonVariant || "ghost"}
-        size={buttonSize || "icon"}
-        className={cn("h-7 w-7", className)} // Apply default and passed className
-        onClick={internalHandleClick} // Apply merged onClick
-        {...props} // Spread other props
-      >
-        {triggerChildrenProp || ( // Render passed children, or default icon
-          <>
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </>
-        )}
-      </Button>
+        onClick={internalHandleClick}
+        className={className}
+        {...props} // {...props} already contains children
+      />
     );
   }
-);
+
+  return (
+    <Button
+      ref={ref}
+      variant={variant || "ghost"}
+      size={size || "icon"}
+      className={cn("h-7 w-7", className)}
+      onClick={internalHandleClick}
+      {...props} // Spread other props, but not children explicitly if we want a default
+    >
+      {triggerChildrenProp || ( // Render passed children, or default icon
+        <>
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Toggle Menu</span>
+        </>
+      )}
+    </Button>
+  );
+});
 SidebarTrigger.displayName = "SidebarTrigger";
 
 
@@ -332,11 +331,10 @@ const SidebarRail = React.forwardRef<
   let IconComponent;
   if (side === 'left') {
     IconComponent = state === 'collapsed' ? ChevronRight : ChevronLeft;
-  } else { // side === 'right'
+  } else { 
     IconComponent = state === 'collapsed' ? ChevronLeft : ChevronRight;
   }
 
-  // Do not render on mobile, mobile has its own trigger
   if (isMobile) return null;
 
   return (
@@ -347,13 +345,12 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute z-20 transition-all ease-linear",
-        "h-10 w-10 rounded-full flex items-center justify-center shadow-lg",
+        "fixed z-20 transition-all ease-linear", 
+        "h-8 w-8 rounded-full flex items-center justify-center shadow-lg cursor-pointer", 
         "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border",
-        "bottom-4 cursor-pointer",
-        "hidden", // Start hidden by default
-        "md:peer-data-[configured-collapsible=icon]:flex", // Make it flex (visible) on md+ screens IF peer is icon-collapsible
-        // Conditional positioning based on sidebar side and state
+        "top-1/2 -translate-y-1/2", 
+        "hidden", 
+        "md:peer-data-[configured-collapsible=icon]:flex", 
         side === 'left' && state === 'collapsed' && 'left-[var(--sidebar-width-icon)] -translate-x-1/2',
         side === 'left' && state === 'expanded' && 'left-[var(--sidebar-width)] -translate-x-1/2',
         side === 'right' && state === 'collapsed' && 'right-[var(--sidebar-width-icon)] translate-x-1/2',
@@ -362,7 +359,7 @@ const SidebarRail = React.forwardRef<
       )}
       {...props}
     >
-      <IconComponent className="h-5 w-5" />
+      <IconComponent className="h-4 w-4" />
     </button>
   )
 })
