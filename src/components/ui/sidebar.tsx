@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { Button, type ButtonProps } from "@/components/ui/button" // Ensure ButtonProps is imported
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -85,7 +85,9 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        if (typeof document !== 'undefined') {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        }
       },
       [setOpenProp, open]
     )
@@ -109,8 +111,10 @@ const SidebarProvider = React.forwardRef<
         }
       }
 
-      window.addEventListener("keydown", handleKeyDown)
-      return () => window.removeEventListener("keydown", handleKeyDown)
+      if (typeof window !== 'undefined') {
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+      }
     }, [toggleSidebar])
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
@@ -262,29 +266,60 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button>
->(({ className, onClick, children, asChild = false, ...props }, ref) => {
+  ButtonProps
+>(({ className, onClick, children, asChild = false, variant, size, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(event);
+    if (onClick) {
+      onClick(event);
+    }
+    if (event.defaultPrevented) {
+      return;
+    }
     toggleSidebar();
   };
 
   const Comp = asChild ? Slot : Button;
 
+  if (asChild) {
+    // If asChild is true, Comp is Slot.
+    // 'children' (passed to SidebarTrigger) is the single React element Slot will manage.
+    // 'props' contains any additional attributes for Slot itself (like className from usage).
+    // Slot merges its props with its child's props.
+    // The 'children' prop is spread via {...props} onto Slot, which Slot then uses.
+    return (
+      <Comp
+        ref={ref}
+        onClick={handleClick}
+        // className from SidebarTrigger usage should be merged by Slot.
+        // It's passed via {...props}.
+        {...props} // This includes 'children' (the child for Slot) and 'className' if any.
+      />
+      // NO explicit children like <Comp>{children}</Comp> because Slot takes children from props.
+    );
+  }
+
+  // If not asChild, Comp is Button.
+  // We render our own Button. 'children' passed to SidebarTrigger (if any)
+  // override the default content of this Button.
   return (
-    <Comp
+    <Button
       ref={ref}
       data-sidebar="trigger"
-      className={cn(asChild ? "" : "h-7 w-7", className)}
+      className={cn("h-7 w-7", className)} // Default styling + user's className for the Button itself
       onClick={handleClick}
-      {...(!asChild && { variant: props.variant || "ghost", size: props.size || "icon" })}
-      {...props}
+      variant={variant || "ghost"} // Use variant passed to SidebarTrigger or default
+      size={size || "icon"}         // Use size passed to SidebarTrigger or default
+      {...props}                    // Other Button-specific props from SidebarTrigger usage
     >
-      {asChild ? children : children || <PanelLeft />}
-      {!asChild && <span className="sr-only">Toggle Sidebar</span>}
-    </Comp>
+      {children || ( // If SidebarTrigger usage provides children, use them; otherwise, default content
+        <>
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Toggle Menu</span>
+        </>
+      )}
+    </Button>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
@@ -306,17 +341,17 @@ const SidebarRail = React.forwardRef<
       title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden cursor-pointer transition-all ease-linear",
-        "w-4 hover:bg-sidebar-accent/20", // Increased width and added hover background
-        "-translate-x-1/2", 
+        "w-4 hover:bg-sidebar-accent/20",
+        "-translate-x-1/2",
         "after:absolute after:inset-y-0 after:left-1/2 after:transition-colors",
-        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", // Thicker line
-        "md:flex", 
+        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary",
+        "md:flex",
         "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
-        "peer-data-[collapsible=offcanvas]:hidden", 
+        "peer-data-[collapsible=offcanvas]:hidden",
         "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
         "peer-data-[side=right]:right-[var(--sidebar-width-icon)] peer-data-[side=right]:translate-x-1/2",
-        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize", 
-        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize", 
+        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize",
+        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize",
         className
       )}
       {...props}
@@ -560,6 +595,7 @@ const SidebarMenuButton = React.forwardRef<
       size = "default",
       tooltip,
       className,
+      children, 
       ...props
     },
     ref
@@ -567,19 +603,21 @@ const SidebarMenuButton = React.forwardRef<
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
 
-    const button = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
-    )
+    const buttonContent = (
+        <Comp
+            ref={ref}
+            data-sidebar="menu-button"
+            data-size={size}
+            data-active={isActive}
+            className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
+            {...props}
+        >
+            {children}
+        </Comp>
+    );
 
     if (!tooltip) {
-      return button
+      return buttonContent
     }
 
     if (typeof tooltip === "string") {
@@ -590,7 +628,7 @@ const SidebarMenuButton = React.forwardRef<
 
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger asChild>{buttonContent}</TooltipTrigger>
         <TooltipContent
           side="right"
           align="center"
@@ -723,7 +761,7 @@ const SidebarMenuSubButton = React.forwardRef<
     size?: "sm" | "md"
     isActive?: boolean
   }
->(({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
+>(({ asChild = false, size = "md", isActive, className, children, ...props }, ref) => { 
   const Comp = asChild ? Slot : "a"
 
   return (
@@ -741,7 +779,9 @@ const SidebarMenuSubButton = React.forwardRef<
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   )
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
@@ -772,3 +812,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    
