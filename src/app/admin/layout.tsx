@@ -1,6 +1,6 @@
 
 import type { PropsWithChildren } from 'react';
-import { SidebarProvider, Sidebar, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar'; // Added SidebarRail
 import { AdminSidebarContent } from '@/components/layout/AdminSidebarContent';
 import { Button } from '@/components/ui/button';
 import { PanelLeft } from 'lucide-react';
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         >
           <AdminSidebarContent />
         </Sidebar>
+        <SidebarRail /> {/* Added SidebarRail here */}
 
         {/* Right Section Wrapper */}
         <div className="flex flex-1 flex-col overflow-hidden"> {/* Ensures this container takes remaining width and handles overflow */}
@@ -36,7 +37,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
               {children}
             </main>
             <footer className="text-center text-xs text-muted-foreground py-4 border-t border-border mt-auto">
-            © 2025 <a href="https://www.alaskaritech.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AlaskariTech</a>. All rights reserved.
+            © 2025 AlaskariTech. All rights reserved.
             </footer>
           </div>
         </div>
