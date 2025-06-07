@@ -43,9 +43,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { placeholderUsers } from "@/lib/placeholder-data";
 import type { User } from "@/types";
-import { useState, type ChangeEvent, useEffect } from "react";
+import { useState, type ChangeEvent, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const initialUserState: User = {
@@ -73,17 +74,22 @@ const initialUserState: User = {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(placeholderUsers);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRoleTab, setSelectedRoleTab] = useState<string>("Alle");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Partial<User>>(JSON.parse(JSON.stringify(initialUserState)));
   const [isViewDetailModalOpen, setIsViewDetailModalOpen] = useState(false);
   const [selectedUserForView, setSelectedUserForView] = useState<User | null>(null);
   const { toast } = useToast();
 
-  // State for complex inputs in the form
   const [permissionsInput, setPermissionsInput] = useState("");
   const [specialityInput, setSpecialityInput] = useState("");
   const [languageSkillsInput, setLanguageSkillsInput] = useState("");
   const [workingHoursInput, setWorkingHoursInput] = useState("");
+
+  const userRoles = useMemo(() => {
+    const roles = new Set(users.map(user => user.role));
+    return ["Alle", ...Array.from(roles).sort()];
+  }, [users]);
 
 
   useEffect(() => {
@@ -102,10 +108,16 @@ export default function UsersPage() {
   }, [currentUser]);
 
 
-  const filteredUsers = users.filter(user =>
-    user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = useMemo(() => {
+    let roleFiltered = users;
+    if (selectedRoleTab !== "Alle") {
+      roleFiltered = users.filter(user => user.role === selectedRoleTab);
+    }
+    return roleFiltered.filter(user =>
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [users, searchTerm, selectedRoleTab]);
 
   const handleGenericInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!currentUser) return;
@@ -154,7 +166,6 @@ export default function UsersPage() {
     setCurrentUser(prev => ({ 
         ...prev, 
         role: value,
-        // Reset role-specific fields when role changes to avoid data mismatch
         permissions: value === 'admin' ? prev?.permissions || [] : [],
         position: value === 'employee' ? prev?.position || "" : "",
         contractType: value === 'employee' ? prev?.contractType || "" : "",
@@ -176,7 +187,7 @@ export default function UsersPage() {
 
   const openAddModal = () => {
     const newUserScaffold = JSON.parse(JSON.stringify(initialUserState));
-    delete newUserScaffold.id; // Ensure no ID for a new user
+    delete newUserScaffold.id; 
     newUserScaffold.createdAt = new Date().toISOString();
     setCurrentUser(newUserScaffold);
     setPermissionsInput("");
@@ -189,7 +200,6 @@ export default function UsersPage() {
   const openEditModal = (user: User) => {
     const userToEdit = { ...JSON.parse(JSON.stringify(initialUserState)), ...user };
     setCurrentUser(userToEdit);
-    // Initialize input strings from user data
     setPermissionsInput(user.permissions?.join(', ') || "");
     setSpecialityInput(user.speciality?.join(', ') || "");
     setLanguageSkillsInput(user.languageSkills?.join(', ') || "");
@@ -219,7 +229,7 @@ export default function UsersPage() {
     }
     
     const finalUserData: User = {
-      ...initialUserState, // Ensure all fields are present
+      ...initialUserState, 
       ...currentUser,
       id: currentUser.id || `u${(Math.random() * 10000).toFixed(0).padStart(3, '0')}`,
       createdAt: currentUser.createdAt || new Date().toISOString(),
@@ -227,7 +237,6 @@ export default function UsersPage() {
       speciality: currentUser.role === 'employee' ? specialityInput.split(',').map(s => s.trim()).filter(s => s) : [],
       languageSkills: currentUser.role === 'employee' ? languageSkillsInput.split(',').map(s => s.trim()).filter(s => s) : [],
       workingHours: currentUser.role === 'employee' ? parsedWorkingHours : undefined,
-      // Ensure only relevant fields for the role are kept, or cleared if role changed
       position: currentUser.role === 'employee' ? currentUser.position : undefined,
       contractType: currentUser.role === 'employee' ? currentUser.contractType : undefined,
       salary: currentUser.role === 'employee' ? currentUser.salary : undefined,
@@ -235,7 +244,7 @@ export default function UsersPage() {
       notes: currentUser.role === 'employee' ? currentUser.notes : undefined,
       phone: currentUser.role === 'customer' ? currentUser.phone : undefined,
       address: currentUser.role === 'customer' ? currentUser.address : undefined,
-      orderHistory: currentUser.role === 'customer' ? currentUser.orderHistory : [], // Order history is not editable here
+      orderHistory: currentUser.role === 'customer' ? currentUser.orderHistory : [], 
     };
   
     if (currentUser?.id) { 
@@ -246,7 +255,7 @@ export default function UsersPage() {
       toast({ title: "Benutzer hinzugefügt", description: `${finalUserData.fullName} wurde erfolgreich erstellt.` });
     }
     setIsFormOpen(false);
-    setCurrentUser(JSON.parse(JSON.stringify(initialUserState))); // Reset form
+    setCurrentUser(JSON.parse(JSON.stringify(initialUserState))); 
   };
 
 
@@ -336,13 +345,22 @@ export default function UsersPage() {
         <CardHeader>
           <CardTitle>User List</CardTitle>
           <CardDescription>View, edit, or add new users.</CardDescription>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-4">
             <Input
               placeholder="Search users by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
+            <Tabs value={selectedRoleTab} onValueChange={setSelectedRoleTab} className="w-full">
+              <TabsList className="flex flex-nowrap h-auto justify-start overflow-x-auto">
+                {userRoles.map((role) => (
+                  <TabsTrigger key={role} value={role} className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 capitalize">
+                    {role}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </CardHeader>
         <CardContent>
@@ -364,13 +382,13 @@ export default function UsersPage() {
                     <TableCell className="font-medium">{user.fullName}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'employee' ? 'secondary' : 'outline'}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'employee' ? 'secondary' : 'outline'} className="capitalize">
+                        {user.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(user.status)}>
-                        {user.status.charAt(0).toUpperCase() + user.status.slice(1).replace('_', ' ')}
+                      <Badge variant={getStatusBadgeVariant(user.status)} className="capitalize">
+                        {user.status.replace('_', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatDate(user.createdAt)}</TableCell>
@@ -412,7 +430,7 @@ export default function UsersPage() {
       <Dialog open={isViewDetailModalOpen} onOpenChange={setIsViewDetailModalOpen}>
         <DialogContent className="sm:max-w-lg">
           <ScrollArea className="max-h-[80vh]">
-            <div className="p-1"> {/* Added padding for ScrollArea content */}
+            <div className="p-1"> 
               <DialogHeader>
                 <DialogTitle>User Details: {selectedUserForView?.fullName}</DialogTitle>
               </DialogHeader>
@@ -466,7 +484,7 @@ export default function UsersPage() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-lg">
          <ScrollArea className="max-h-[80vh]">
-           <div className="p-1"> {/* Added padding for ScrollArea content */}
+           <div className="p-1"> 
             <DialogHeader>
                 <DialogTitle>{currentUser?.id ? "Benutzer bearbeiten" : "Neuen Benutzer hinzufügen"}</DialogTitle>
                 <DialogDescription>
@@ -474,7 +492,6 @@ export default function UsersPage() {
                 </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-                {/* General Fields */}
                 <div className="space-y-2">
                     <Label htmlFor="fullName">Vollständiger Name</Label>
                     <Input id="fullName" name="fullName" value={currentUser?.fullName || ""} onChange={handleGenericInputChange} />
@@ -507,7 +524,6 @@ export default function UsersPage() {
                     </Select>
                 </div>
 
-                {/* Admin Specific Fields */}
                 {currentUser?.role === 'admin' && (
                     <div className="space-y-2">
                         <Label htmlFor="permissions">Berechtigungen (kommasepariert)</Label>
@@ -515,7 +531,6 @@ export default function UsersPage() {
                     </div>
                 )}
 
-                {/* Employee Specific Fields */}
                 {currentUser?.role === 'employee' && (
                     <>
                     <div className="space-y-2">
@@ -570,7 +585,6 @@ export default function UsersPage() {
                     </>
                 )}
 
-                {/* Customer Specific Fields */}
                 {currentUser?.role === 'customer' && (
                     <>
                     <div className="space-y-2">
