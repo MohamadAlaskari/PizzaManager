@@ -262,7 +262,7 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  ButtonProps
+  React.ComponentProps<typeof Button>
 >(({ className, onClick, children, asChild = false, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
 
@@ -271,35 +271,20 @@ const SidebarTrigger = React.forwardRef<
     toggleSidebar();
   };
 
-  if (asChild) {
-    // If asChild is true, render Slot and pass props to the child.
-    // The child component is responsible for rendering the actual button.
-    return (
-      <Slot
-        ref={ref}
-        onClick={handleClick}
-        className={className} // Pass className to Slot
-        {...props} // Pass other props (variant, size etc.) to Slot
-      >
-        {children}
-      </Slot>
-    );
-  }
+  const Comp = asChild ? Slot : Button;
 
-  // If not asChild, render its own Button with default content
   return (
-    <Button
+    <Comp
       ref={ref}
       data-sidebar="trigger"
-      variant={props.variant || "ghost"}
-      size={props.size || "icon"}
-      className={cn("h-7 w-7", className)} // Default styling + passed className for the button itself
+      className={cn(asChild ? "" : "h-7 w-7", className)}
       onClick={handleClick}
-      {...props} // Pass other props but ensure asChild is not re-applied here
+      {...(!asChild && { variant: props.variant || "ghost", size: props.size || "icon" })}
+      {...props}
     >
-      {children || <PanelLeft />} {/* Default icon if no children provided */}
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+      {asChild ? children : children || <PanelLeft />}
+      {!asChild && <span className="sr-only">Toggle Sidebar</span>}
+    </Comp>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
@@ -320,21 +305,18 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-2.5 cursor-pointer transition-all ease-linear",
-        "-translate-x-1/2", // Centers the rail line on its position
-        "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:bg-sidebar-border after:transition-colors hover:after:w-[3px] hover:after:bg-primary",
-        "md:flex", // Show on desktop
-        // Visibility based on peer (Sidebar) state and type
+        "absolute inset-y-0 z-20 hidden cursor-pointer transition-all ease-linear",
+        "w-4 hover:bg-sidebar-accent/20", // Increased width and added hover background
+        "-translate-x-1/2", 
+        "after:absolute after:inset-y-0 after:left-1/2 after:transition-colors",
+        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", // Thicker line
+        "md:flex", 
         "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
-        "peer-data-[collapsible=offcanvas]:hidden", // Hide if sidebar is full offcanvas type
-
-        // Positioning based on peer (Sidebar)
+        "peer-data-[collapsible=offcanvas]:hidden", 
         "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
-        "peer-data-[side=right]:right-[var(--sidebar-width-icon)] peer-data-[side=right]:translate-x-1/2", // Adjust translate for right side if needed
-
-        // Cursor adjustments based on action
-        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize", // Expand East
-        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize", // Expand West
+        "peer-data-[side=right]:right-[var(--sidebar-width-icon)] peer-data-[side=right]:translate-x-1/2",
+        "peer-data-[side=left]:peer-data-[state=collapsed]:cursor-e-resize", 
+        "peer-data-[side=right]:peer-data-[state=collapsed]:cursor-w-resize", 
         className
       )}
       {...props}
