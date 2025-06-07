@@ -48,6 +48,7 @@ import { placeholderUsers } from "@/lib/placeholder-data";
 import type { User } from "@/types";
 import { useState, type ChangeEvent, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const initialUserState: User = {
   id: "",
@@ -166,7 +167,6 @@ export default function UsersPage() {
     setCurrentUser(prev => ({ 
         ...prev, 
         role: value,
-        // Reset role-specific fields when role changes, keeping existing values if applicable
         permissions: value === 'admin' ? prev?.permissions || [] : [],
         position: value === 'employee' ? prev?.position || "" : "",
         contractType: value === 'employee' ? prev?.contractType || "" : "",
@@ -274,15 +274,22 @@ export default function UsersPage() {
     }
   };
 
-  const getStatusBadgeVariant = (status?: User['status']): BadgeProps['variant'] => {
+  const getStatusBadgeProps = (status?: User['status']): { variant: BadgeProps['variant'], className: string } => {
+    const baseClassName = "capitalize";
     switch (status) {
-      case 'active': return 'default'; // Assuming default/primary is themed green-ish
-      case 'suspended': return 'destructive'; // Red
-      case 'pending_verification': return 'outline'; // Yellowish/Neutral, depends on accent theme for outline
-      case 'inactive': return 'secondary'; // Greyish
-      default: return 'default';
+      case 'active':
+        return { variant: 'outline', className: cn(baseClassName, 'border-green-500 bg-green-100 text-green-700 dark:border-green-700 dark:bg-green-900/30 dark:text-green-400') };
+      case 'suspended':
+        return { variant: 'destructive', className: baseClassName };
+      case 'pending_verification':
+        return { variant: 'outline', className: cn(baseClassName, 'border-yellow-500 bg-yellow-100 text-yellow-700 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400') };
+      case 'inactive':
+        return { variant: 'secondary', className: baseClassName };
+      default:
+        return { variant: 'default', className: baseClassName };
     }
   };
+
 
   const renderDetailItem = (label: string, value?: string | string[] | number | null | Record<string, any> | any[]) => {
     if (value === undefined || value === null || (typeof value === 'string' && value.trim() === "") || (Array.isArray(value) && value.length === 0)) {
@@ -292,7 +299,8 @@ export default function UsersPage() {
     if (Array.isArray(value)) {
       displayValue = value.join(', ');
     } else if (label === "Status" && typeof value === 'string') {
-        displayValue = <Badge variant={getStatusBadgeVariant(value as User['status'])} className="capitalize">{value.replace('_', ' ')}</Badge>;
+        const { variant: detailStatusVariant, className: detailStatusClassName } = getStatusBadgeProps(value as User['status']);
+        displayValue = <Badge variant={detailStatusVariant} className={detailStatusClassName}>{value.replace(/_/g, ' ')}</Badge>;
     } else if (typeof value === 'object' && value !== null) {
         if(label === "Gehalt" && 'amount' in value && 'currency' in value && 'type' in value) {
             displayValue = `${(value as User['salary'])?.amount} ${(value as User['salary'])?.currency} (${(value as User['salary'])?.type})`;
@@ -380,46 +388,49 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.fullName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'employee' ? 'secondary' : 'outline'} className="capitalize">
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(user.status)} className="capitalize">
-                        {user.status.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(user.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                           <DropdownMenuItem onClick={() => openViewDetailModal(user)}>
-                            <Eye className="mr-2 h-4 w-4" /> Anzeigen
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEditModal(user)}>
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => handleDeleteUser(user.id)}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredUsers.map((user) => {
+                  const { variant: statusVariant, className: statusClassName } = getStatusBadgeProps(user.status);
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.fullName}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'employee' ? 'secondary' : 'outline'} className="capitalize">
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant} className={statusClassName}>
+                          {user.status.replace(/_/g, ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{formatDate(user.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => openViewDetailModal(user)}>
+                              <Eye className="mr-2 h-4 w-4" /> Anzeigen
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditModal(user)}>
+                              <Edit className="mr-2 h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => handleDeleteUser(user.id)}>
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
             {filteredUsers.length === 0 && (
