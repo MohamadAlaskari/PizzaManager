@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button" // Ensure ButtonProps is imported
+import { Button, type ButtonProps } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -71,8 +71,6 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    // This is the internal state of the sidebar.
-    // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
@@ -84,7 +82,6 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState)
         }
 
-        // This sets the cookie to keep the sidebar state.
         if (typeof document !== 'undefined') {
           document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
         }
@@ -92,14 +89,12 @@ const SidebarProvider = React.forwardRef<
       [setOpenProp, open]
     )
 
-    // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
       return isMobile
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open)
     }, [isMobile, setOpen, setOpenMobile])
 
-    // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (
@@ -117,8 +112,6 @@ const SidebarProvider = React.forwardRef<
       }
     }, [toggleSidebar])
 
-    // We add a state so that we can do data-state="expanded" or "collapsed".
-    // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
     const contextValue = React.useMemo<SidebarContext>(
@@ -226,7 +219,6 @@ const Sidebar = React.forwardRef<
         data-variant={variant}
         data-side={side}
       >
-        {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
             "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
@@ -243,7 +235,6 @@ const Sidebar = React.forwardRef<
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-            // Adjust the padding for floating and inset variants.
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -266,62 +257,73 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  ButtonProps
->(({ className, onClick, children, asChild = false, variant, size, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar();
+  ButtonProps // Includes children, asChild, variant, size, className, onClick, etc.
+>(
+  (
+    {
+      className, // className passed to <SidebarTrigger>
+      variant,   // variant passed to <SidebarTrigger>
+      size,      // size passed to <SidebarTrigger>
+      asChild = false,
+      // ...props will contain `children` and `onClick` (if provided in usage)
+      // and any other valid HTML button attributes.
+      ...props
+    },
+    ref
+  ) => {
+    const { toggleSidebar } = useSidebar();
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (onClick) {
-      onClick(event);
-    }
-    if (event.defaultPrevented) {
-      return;
-    }
-    toggleSidebar();
-  };
+    // This function will be used as the onClick handler for Slot or Button.
+    // It calls the user-provided onClick (if any) and then toggles the sidebar.
+    const internalHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (props.onClick) {
+        props.onClick(event); // Call user's onClick if it exists
+      }
+      if (event.defaultPrevented) {
+        return; // Respect if user's onClick prevented default
+      }
+      toggleSidebar();
+    };
 
-  const Comp = asChild ? Slot : Button;
+    const Comp = asChild ? Slot : Button;
 
-  if (asChild) {
-    // If asChild is true, Comp is Slot.
-    // 'children' (passed to SidebarTrigger) is the single React element Slot will manage.
-    // 'props' contains any additional attributes for Slot itself (like className from usage).
-    // Slot merges its props with its child's props.
-    // The 'children' prop is spread via {...props} onto Slot, which Slot then uses.
     return (
       <Comp
+        // If asChild is true, Comp is Slot. Slot merges className with its child.
+        // If asChild is false, Comp is Button. We apply default styles + user's className.
+        className={asChild ? className : cn("h-7 w-7", className)}
+        // variant and size are primarily for when Comp is Button (asChild=false).
+        // If asChild is true, Slot will pass these to its child if the child accepts them.
+        variant={variant || "ghost"}
+        size={size || "icon"}
         ref={ref}
-        onClick={handleClick}
-        // className from SidebarTrigger usage should be merged by Slot.
-        // It's passed via {...props}.
-        {...props} // This includes 'children' (the child for Slot) and 'className' if any.
-      />
-      // NO explicit children like <Comp>{children}</Comp> because Slot takes children from props.
+        // Spread all other props. For Slot, this includes `children` (the element to clone).
+        // For Button, this includes any standard button attributes.
+        {...props}
+        // CRUCIAL: Always use our internalHandleClick to ensure toggleSidebar is called.
+        onClick={internalHandleClick}
+      >
+        {/* This content is rendered ONLY if asChild is false AND props.children is NOT provided.
+            If asChild is true, Slot handles props.children, and this block is effectively ignored by Slot.
+            If asChild is false and props.children IS provided (e.g. <SidebarTrigger>My Text</SidebarTrigger>),
+            the Button component (Comp) will render props.children.
+            If asChild is false and props.children is UNDEFINED, this default content is rendered.
+        */}
+        {!asChild && !props.children && (
+          <>
+            <PanelLeft className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </>
+        )}
+        {/* If `asChild` is false, and `props.children` *is* provided, `Button` (which is `Comp`)
+            will render those children. If `props.children` is not provided, the above block is used.
+            If `asChild` is true, `Slot` (which is `Comp`) will use `props.children` as its target child,
+            and this block is not directly rendered by `Slot` itself.
+        */}
+      </Comp>
     );
   }
-
-  // If not asChild, Comp is Button.
-  // We render our own Button. 'children' passed to SidebarTrigger (if any)
-  // override the default content of this Button.
-  return (
-    <Button
-      ref={ref}
-      data-sidebar="trigger"
-      className={cn("h-7 w-7", className)} // Default styling + user's className for the Button itself
-      onClick={handleClick}
-      variant={variant || "ghost"} // Use variant passed to SidebarTrigger or default
-      size={size || "icon"}         // Use size passed to SidebarTrigger or default
-      {...props}                    // Other Button-specific props from SidebarTrigger usage
-    >
-      {children || ( // If SidebarTrigger usage provides children, use them; otherwise, default content
-        <>
-          <PanelLeft className="h-5 w-5" />
-          <span className="sr-only">Toggle Menu</span>
-        </>
-      )}
-    </Button>
-  );
-});
+);
 SidebarTrigger.displayName = "SidebarTrigger";
 
 
@@ -341,11 +343,12 @@ const SidebarRail = React.forwardRef<
       title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden cursor-pointer transition-all ease-linear",
-        "w-4 hover:bg-sidebar-accent/20",
+        "w-4 hover:bg-sidebar-accent/20", // Increased width for better clickability
         "-translate-x-1/2",
         "after:absolute after:inset-y-0 after:left-1/2 after:transition-colors",
-        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary",
-        "md:flex",
+        "after:w-0.5 after:bg-sidebar-border hover:after:w-1 hover:after:bg-primary", // Thicker line
+        "md:flex", // Changed from sm:flex to md:flex
+        // Corrected peer selectors
         "peer-data-[collapsible=icon]:flex peer-data-[state=expanded]:hidden",
         "peer-data-[collapsible=offcanvas]:hidden",
         "peer-data-[side=left]:left-[var(--sidebar-width-icon)]",
@@ -507,7 +510,6 @@ const SidebarGroupAction = React.forwardRef<
       data-sidebar="group-action"
       className={cn(
         "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
         className
@@ -595,7 +597,7 @@ const SidebarMenuButton = React.forwardRef<
       size = "default",
       tooltip,
       className,
-      children, 
+      children,
       ...props
     },
     ref
@@ -656,7 +658,6 @@ const SidebarMenuAction = React.forwardRef<
       data-sidebar="menu-action"
       className={cn(
         "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
@@ -699,7 +700,6 @@ const SidebarMenuSkeleton = React.forwardRef<
     showIcon?: boolean
   }
 >(({ className, showIcon = false, ...props }, ref) => {
-  // Random width between 50 to 90%.
   const width = React.useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
@@ -761,7 +761,7 @@ const SidebarMenuSubButton = React.forwardRef<
     size?: "sm" | "md"
     isActive?: boolean
   }
->(({ asChild = false, size = "md", isActive, className, children, ...props }, ref) => { 
+>(({ asChild = false, size = "md", isActive, className, children, ...props }, ref) => {
   const Comp = asChild ? Slot : "a"
 
   return (
@@ -812,5 +812,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
-    
