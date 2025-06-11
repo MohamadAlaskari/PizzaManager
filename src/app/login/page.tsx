@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CookingPot, LogInIcon } from "lucide-react";
+import { CookingPot } from "lucide-react"; // LogInIcon removed
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +64,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex flex-col items-center">
             <CookingPot className="h-12 w-12 text-primary" />
-            <LogInIcon className="h-8 w-8 text-muted-foreground -mt-2" />
+            {/* <LogInIcon className="h-8 w-8 text-muted-foreground -mt-2" /> Removed */}
           </div>
           <CardTitle className="text-3xl font-bold font-headline">PizzaManager</CardTitle>
           <CardDescription>Admin Panel Login</CardDescription>
@@ -113,3 +113,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
