@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // Added useRouter
 import {
   LayoutDashboard,
   Users,
@@ -15,6 +15,8 @@ import {
   ChevronUp,
   Package,
   CookingPot,
+  UserCircle, // New Icon
+  LogOut,     // New Icon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -27,7 +29,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   useSidebar,
-  SidebarMenuSubItem, // Added import
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 
@@ -48,8 +50,9 @@ const navItems = [
 
 export function AdminSidebarContent() {
   const pathname = usePathname();
-  const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({ "AI Tools": false }); // Changed true to false
-  const { state: sidebarState, isMobile } = useSidebar();
+  const router = useRouter();
+  const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({ "AI Tools": false });
+  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar();
 
   const toggleCollapsible = (label: string) => {
     setOpenCollapsibles(prev => ({ ...prev, [label]: !prev[label] }));
@@ -61,6 +64,13 @@ export function AdminSidebarContent() {
       // setOpenCollapsibles(prev => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}));
     }
   }, [sidebarState, isMobile]);
+
+  const handleLogout = () => {
+    if (isMobile) {
+      setOpenMobile(false); // Close mobile sidebar if open
+    }
+    router.push("/login");
+  };
 
 
   return (
@@ -93,7 +103,6 @@ export function AdminSidebarContent() {
                   </div>
                   {sidebarState === 'expanded' && (openCollapsibles[item.label] ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />)}
                 </SidebarMenuButton>
-                {/* Sub-menu is always rendered for tooltips in icon mode, but items only visible if expanded */}
                 {openCollapsibles[item.label] && sidebarState === 'expanded' && (
                   <SidebarMenuSub>
                     {item.subItems.map((subItem) => (
@@ -103,7 +112,7 @@ export function AdminSidebarContent() {
                           asChild
                           isActive={pathname === subItem.href}
                         >
-                          <Link href={subItem.href} className="flex items-center gap-2 pl-3 overflow-hidden"> {/* Added pl-3 for indentation */}
+                          <Link href={subItem.href} className="flex items-center gap-2 pl-3 overflow-hidden">
                             <subItem.icon className="h-4 w-4 flex-shrink-0" />
                              <span className="whitespace-nowrap">{subItem.label}</span>
                           </Link>
@@ -136,14 +145,38 @@ export function AdminSidebarContent() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              href="#" /* TODO: Link to actual settings page */
+              href="/admin/profile"
               asChild 
+              isActive={pathname === "/admin/profile"}
+              tooltip={{ children: "Profile", side: "right", align: "center" }}
+            >
+              <Link href="/admin/profile" className="flex items-center gap-2 overflow-hidden">
+                <UserCircle className="h-5 w-5 flex-shrink-0" />
+                 <span className="whitespace-nowrap">Profile</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              href="/admin/settings" 
+              asChild 
+              isActive={pathname === "/admin/settings"}
               tooltip={{ children: "Settings", side: "right", align: "center" }}
             >
-              <Link href="#" className="flex items-center gap-2 overflow-hidden">
+              <Link href="/admin/settings" className="flex items-center gap-2 overflow-hidden">
                 <Settings className="h-5 w-5 flex-shrink-0" />
                  <span className="whitespace-nowrap">Settings</span>
               </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              tooltip={{ children: "Logout", side: "right", align: "center" }}
+              className="hover:bg-sidebar-accent/80" // Custom subtle hover
+            >
+              <LogOut className="h-5 w-5 flex-shrink-0 text-red-500 group-hover:text-red-400" />
+              <span className="whitespace-nowrap text-red-500 group-hover:text-red-400">Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
