@@ -274,7 +274,7 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
-  Omit<ButtonProps, "onClick"> & {
+  Omit<ButtonProps, "onClick"> & { 
     asChild?: boolean;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
   }
@@ -291,26 +291,32 @@ const SidebarTrigger = React.forwardRef<
   };
 
   const Comp = asChild ? Slot : Button;
+  
+  if (asChild) {
+    return (
+      <Comp
+        ref={ref}
+        className={className}
+        onClick={internalHandleClick}
+        {...props} // This already includes children passed to SidebarTrigger
+      />
+    );
+  }
 
   return (
     <Comp
       ref={ref}
-      className={cn(
-        !asChild && "h-7 w-7", // Default size if not asChild
-        className
-      )}
-      variant={!asChild ? buttonVariant || "ghost" : undefined}
-      size={!asChild ? buttonSize || "icon" : undefined}
+      className={cn("h-7 w-7", className)} // Default size if not asChild
+      variant={buttonVariant || "ghost"}
+      size={buttonSize || "icon"}
       onClick={internalHandleClick}
-      {...props} // Spreads original children if asChild, and other props
+      {...props} // Spreads original children if provided, and other props
     >
-      {!asChild && !triggerChildren ? ( // Default icon only if not asChild AND no children provided
+      {triggerChildren ?? ( // Default icon only if no children provided explicitly
         <>
           <PanelLeft className="h-5 w-5" />
           <span className="sr-only">Toggle Menu</span>
         </>
-      ) : (
-        triggerChildren // Render provided children if asChild or if children are explicitly passed
       )}
     </Comp>
   );
@@ -322,7 +328,7 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar, side, state, isMobile } = useSidebar()
+  const { toggleSidebar, side, state, isMobile } = useSidebar();
 
   let IconComponent;
   if (side === 'left') {
@@ -341,14 +347,14 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "fixed z-20 transition-all ease-linear", 
-        "h-8 w-8 rounded-full flex items-center justify-center shadow-lg cursor-pointer", 
+        "fixed z-20 transition-all ease-linear",
+        "h-8 w-8 rounded-full flex items-center justify-center shadow-lg cursor-pointer",
         "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-sidebar-border",
         "top-[calc(50%+3rem)] -translate-y-1/2", 
-        "hidden", 
-        "md:peer-data-[configured-collapsible=icon]:flex", 
-        side === 'left' && state === 'collapsed' && 'left-[calc(var(--sidebar-width-icon)-1rem)]', // Adjusted for button center
-        side === 'left' && state === 'expanded' && 'left-[calc(var(--sidebar-width)-1rem)]',     // Adjusted for button center
+        "hidden",
+        "md:peer-data-[configured-collapsible=icon]:flex",
+        side === 'left' && state === 'collapsed' && 'left-[calc(var(--sidebar-width-icon)-1rem)]',
+        side === 'left' && state === 'expanded' && 'left-[calc(var(--sidebar-width)-1rem)]',    
         side === 'right' && state === 'collapsed' && 'right-[calc(var(--sidebar-width-icon)-1rem)]',
         side === 'right' && state === 'expanded' && 'right-[calc(var(--sidebar-width)-1rem)]',
         className
@@ -357,8 +363,8 @@ const SidebarRail = React.forwardRef<
     >
       <IconComponent className="h-4 w-4" />
     </button>
-  )
-})
+  );
+});
 SidebarRail.displayName = "SidebarRail"
 
 const SidebarInset = React.forwardRef<
@@ -558,7 +564,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-primary data-[active=true]:font-medium data-[active=true]:text-sidebar-primary-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -770,7 +776,7 @@ const SidebarMenuSubButton = React.forwardRef<
       data-active={isActive}
       className={cn(
         "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
-        "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
+        "data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground",
         size === "sm" && "text-xs",
         size === "md" && "text-sm",
         "group-data-[collapsible=icon]:hidden",
