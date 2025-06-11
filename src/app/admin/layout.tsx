@@ -22,13 +22,13 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Mobile Trigger Header */}
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
+            <div className="font-semibold">PizzaManager</div>
             <SidebarTrigger asChild>
               <Button size="icon" variant="outline">
                 <Menu className="h-5 w-5" /> {/* Changed from PanelLeft to Menu */}
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SidebarTrigger>
-            <div className="font-semibold">PizzaManager</div>
           </header>
 
           {/* Main content and footer scroll container */}
