@@ -3,12 +3,12 @@ import type { PropsWithChildren } from 'react';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { AdminSidebarContent } from '@/components/layout/AdminSidebarContent';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react'; // Changed from PanelLeft to Menu
+import { Menu } from 'lucide-react'; 
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="relative flex min-h-screen w-full bg-background"> {/* Added relative */}
+      <div className="relative flex min-h-screen w-full bg-background"> 
         <Sidebar
             collapsible="icon"
             className="hidden md:flex border-r border-sidebar-border"
@@ -23,11 +23,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
           {/* Mobile Trigger Header */}
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
             <div className="font-semibold">PizzaManager</div>
-            <SidebarTrigger asChild>
-              <Button size="icon" variant="outline">
-                <Menu className="h-5 w-5" /> {/* Changed from PanelLeft to Menu */}
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
+            <SidebarTrigger variant="outline" size="icon">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
             </SidebarTrigger>
           </header>
 
