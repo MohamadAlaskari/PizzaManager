@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { AdminSidebarContent } from '@/components/layout/AdminSidebarContent';
 import { Button } from '@/components/ui/button';
-import { PanelLeft } from 'lucide-react';
+import { Menu } from 'lucide-react'; // Changed from PanelLeft to Menu
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
             <SidebarTrigger asChild>
               <Button size="icon" variant="outline">
-                <PanelLeft className="h-5 w-5" />
+                <Menu className="h-5 w-5" /> {/* Changed from PanelLeft to Menu */}
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SidebarTrigger>
