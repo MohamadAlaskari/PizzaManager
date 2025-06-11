@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CookingPot, UserPlus } from "lucide-react";
+import { CookingPot } from "lucide-react"; // UserPlus removed
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -75,7 +75,7 @@ export default function SignupPage() {
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex flex-col items-center">
             <CookingPot className="h-12 w-12 text-primary" />
-            <UserPlus className="h-8 w-8 text-muted-foreground -mt-2" />
+            {/* <UserPlus className="h-8 w-8 text-muted-foreground -mt-2" /> Removed */}
           </div>
           <CardTitle className="text-3xl font-bold font-headline">PizzaManager</CardTitle>
           <CardDescription>Neues Konto erstellen</CardDescription>
@@ -143,3 +143,4 @@ export default function SignupPage() {
     </div>
   );
 }
+
